@@ -21,6 +21,7 @@
     "discord",
     "http-bot"
   ],
+  "files": ["lib/**/*"],
   "author": "oriel-beck",
   "license": "ISC",
   "dependencies": {

@@ -143,10 +143,3 @@ export interface HttpBotClientOptions {
   djsRest: Partial<RESTOptions>;
   defaultRoute(req: IncomingMessage, res: ServerResponse<IncomingMessage>): unknown;
 }
-
-// export interface Stores {
-//     commands: SuperMap<string, ApplicationCommandController>,
-//     components: SuperMap<string, ComponentInteractionController>,
-//     modals: SuperMap<string, ModalSubmitInteractionController>,
-//     autocomplete: SuperMap<string, AutocompleteInteractionController>
-// }
