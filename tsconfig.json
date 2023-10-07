@@ -30,5 +30,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["commitlint.config.cjs", ".eslintrc.cjs"]
 }
