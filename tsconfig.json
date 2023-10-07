@@ -25,15 +25,10 @@
     "strict": true,
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "outDir": "dist",
+    "outDir": "lib",
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "baseUrl": "./src",
-    "paths": {
-      "@lib/*": [
-        "lib/*"
-      ]
-    }
-  }
+    "skipLibCheck": true
+  },
+  "include": ["src"]
 }
