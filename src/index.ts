@@ -1,3 +1,4 @@
-export * from './controllers/controller';
-export * from './controllers/types';
-export * from './structs/client';
+export * from './controllers';
+export * from './structs/errors';
+export * from './structs';
+export * from './util';
