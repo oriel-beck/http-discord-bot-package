@@ -23,7 +23,7 @@
   ],
   "files": ["lib/**/*"],
   "author": "oriel-beck",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@discordjs/rest": "^2.0.1",
     "@thunder04/supermap": "^3.0.3",
