@@ -74,8 +74,8 @@ export class HttpOnlyBot {
 
     return new Promise<void>((res, rej) => {
       this.server.listen(5000, '0.0.0.0', callback);
-      this.server.once("listening", () => res());
-      this.server.once("error", (err) => rej(err));
+      this.server.once('listening', () => res());
+      this.server.once('error', (err) => rej(err));
     });
   }
 
