@@ -80,13 +80,15 @@ export class HttpOnlyBot {
   }
 
   async registerCommands() {
-    const commands = this.stores.commands.map((controller) => {
-      const commandBody = controller.register();
-      if (!commandBody) return null;
-      return commandBody.toJSON();
-    }).filter((v) => !!v);
+    const commands = this.stores.commands
+      .map((controller) => {
+        const commandBody = controller.register();
+        if (!commandBody) return null;
+        return commandBody.toJSON();
+      })
+      .filter((v) => !!v);
     await this.rest.put(Routes.applicationCommands(process.env.APPLICATION_ID!), {
-      body: commands
+      body: commands,
     });
   }
 
