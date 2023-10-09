@@ -2,7 +2,7 @@ import { join } from 'path';
 import http, { type IncomingMessage, type ServerResponse } from 'http';
 import pino, { type Logger, type LoggerOptions } from 'pino';
 import findMyWay from 'find-my-way';
-import { InteractionType } from 'discord-api-types/v10';
+import { InteractionType, Routes } from 'discord-api-types/v10';
 import { REST, type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
 
@@ -76,6 +76,17 @@ export class HttpOnlyBot {
       this.server.listen(5000, '0.0.0.0', callback);
       this.server.once('listening', () => res());
       this.server.once('error', (err) => rej(err));
+    });
+  }
+
+  async registerCommands() {
+    const commands = this.stores.commands.map((controller) => {
+      const commandBody = controller.register();
+      if (!commandBody) return null;
+      return commandBody.toJSON();
+    }).filter((v) => !!v);
+    await this.rest.put(Routes.applicationCommands(process.env.APPLICATION_ID!), {
+      body: commands
     });
   }
 

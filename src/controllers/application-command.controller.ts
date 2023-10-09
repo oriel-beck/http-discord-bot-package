@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { APIApplicationCommand, APIApplicationCommandInteraction } from 'discord-api-types/v10';
 import type { IncomingMessage, ServerResponse } from 'http';
+import type { SlashCommandBuilder } from '@discordjs/builders';
+
 import { BaseController } from './base.controller';
 
 export class ApplicationCommandController extends BaseController {
@@ -13,5 +15,7 @@ export class ApplicationCommandController extends BaseController {
   ): unknown {
     throw new Error('Method not implemented');
   }
+
+  register(): SlashCommandBuilder | void {}
   // TODO: add a registry method to get all the data needed to register the command
 }

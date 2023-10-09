@@ -29,6 +29,7 @@
   "author": "oriel-beck",
   "license": "MIT",
   "dependencies": {
+    "@discordjs/builders": "^1.6.5",
     "@discordjs/rest": "^2.0.1",
     "@thunder04/supermap": "^3.0.3",
     "discord-api-types": "^0.37.60",

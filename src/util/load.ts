@@ -28,6 +28,7 @@ export async function loadCommands(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ApplicationCommandController>(`file://${join(path, dirent.name)}`);
       const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name));
+      store.set(route, controllerInstance);
       loadRoute(router, route, controllerInstance);
     }
   }
@@ -50,6 +51,7 @@ export async function loadComponents(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ComponentInteractionController>(`file://${join(path, dirent.name)}`);
       const route = buildRoute(joinRoute(prefix, controllerInstance.componentType.toString(), dirent.name === 'index.js' ? '' : dirent.name));
+      store.set(route, controllerInstance);
       loadRoute(router, route, controllerInstance);
     }
   }
@@ -72,6 +74,7 @@ export async function loadModals(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ModalSubmitInteractionController>(`file://${join(path, dirent.name)}`);
       const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name));
+      store.set(route, controllerInstance);
       loadRoute(router, route, controllerInstance);
     }
   }
@@ -94,6 +97,7 @@ export async function loadAutocomplete(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<AutocompleteInteractionController>(`file://${join(path, dirent.name)}`);
       const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name, controllerInstance.option));
+      store.set(route, controllerInstance);
       loadRoute(router, route, controllerInstance);
     }
   }
