@@ -11,12 +11,12 @@ import { ApplicationCommandController } from '../controllers/application-command
 import { ComponentInteractionController } from '../controllers/component-interaction.controller';
 import { ModalSubmitInteractionController } from '../controllers/modal-submit-interaction.controller';
 import { AutocompleteInteractionController } from '../controllers/autocomplete-interaction.controller';
-import { ValidationError } from './errors/validation.error';
-import { IncorrectTypeError } from './errors/incorrect-type.error';
 import { Errors } from './errors/constants';
-import { getRootPath, verifyRequest } from '../util/util';
+import { getRootPath, validateOptions, verifyRequest } from '../util/util';
 
 export class HttpOnlyBot {
+  #publicKey: string;
+
   stores = {
     commands: new SuperMap<string, ApplicationCommandController>(),
     components: new SuperMap<string, ComponentInteractionController>(),
@@ -29,8 +29,11 @@ export class HttpOnlyBot {
   router: findMyWay.Instance<findMyWay.HTTPVersion.V1>;
   port: number;
   host: string | undefined;
+  applicationId: string;
 
-  constructor(opts?: HttpBotClientOptions) {
+  constructor(opts: HttpBotClientOptions) {
+    validateOptions(opts);
+
     this.logger = pino({
       level: 'debug',
       name: 'http-only-bot',
@@ -42,35 +45,34 @@ export class HttpOnlyBot {
     });
     this.rest = new REST(opts?.djsRestOptions);
     this.port = opts?.port || 5000;
-    this.host = opts?.host
+    this.host = opts?.host;
+    this.applicationId = Buffer.from(opts.botToken.split('.').at(0)!, 'base64').toString('ascii');
+    this.#publicKey = opts.publicKey;
+    this.rest.setToken(opts.botToken);
   }
 
-  async login(token: string, callback?: () => unknown) {
-    if (!token) throw new ValidationError('Missing argument "token"');
-    if (typeof token !== 'string') throw new IncorrectTypeError('token', 'string', typeof token);
-    const applicationId = Buffer.from(token.split('.').at(0)!, 'base64').toString('ascii');
-    this.logger.debug(`Logging in as ${applicationId}`);
-    this.rest.setToken(token);
+  async login(callback?: () => unknown) {
+    this.logger.debug(`Logging in as ${this.applicationId}`);
     const maindir = getRootPath();
 
     this.logger.info('Initiating commands');
     let ts = Date.now();
-    await loadCommands(this.router, join(maindir, 'commands'), 'commands', this.stores.commands);
+    await loadCommands(this.#publicKey, this.router, join(maindir, 'commands'), 'commands', this.stores.commands);
     this.logger.info(`Initiated commands in ${Date.now() - ts}ms`);
 
     this.logger.info('Initiating componenets');
     ts = Date.now();
-    await loadComponents(this.router, join(maindir, 'components'), 'components', this.stores.components);
+    await loadComponents(this.#publicKey, this.router, join(maindir, 'components'), 'components', this.stores.components);
     this.logger.info(`Initiated components in ${Date.now() - ts}ms`);
 
     this.logger.info('Initiating modals');
     ts = Date.now();
-    await loadModals(this.router, join(maindir, 'modals'), 'modals', this.stores.modals);
+    await loadModals(this.#publicKey, this.router, join(maindir, 'modals'), 'modals', this.stores.modals);
     this.logger.info(`Initiated modals in ${Date.now() - ts}ms`);
 
     this.logger.info('Initiating autocomplete');
     ts = Date.now();
-    await loadAutocomplete(this.router, join(maindir, 'autocomplete'), 'autocomplete', this.stores.autocomplete);
+    await loadAutocomplete(this.#publicKey, this.router, join(maindir, 'autocomplete'), 'autocomplete', this.stores.autocomplete);
     this.logger.info(`Initiated autocomplete in ${Date.now() - ts}ms`);
 
     this.logger.info('Initiating server');
@@ -129,7 +131,7 @@ export class HttpOnlyBot {
   ) {
     res.setHeader('Content-Type', 'application/json');
 
-    const verified = verifyRequest(req, buffer);
+    const verified = verifyRequest(this.#publicKey, req, buffer);
     if (verified) return Errors.Unauthorized(res);
     switch (data.type) {
       case InteractionType.Ping:
@@ -154,6 +156,8 @@ export class HttpOnlyBot {
 export interface HttpBotClientOptions {
   port?: number;
   host?: string;
+  publicKey: string;
+  botToken: string;
   loggerOptions?: LoggerOptions;
   routerOptions?: findMyWay.Config<findMyWay.HTTPVersion.V1>;
   djsRestOptions?: Partial<RESTOptions>;

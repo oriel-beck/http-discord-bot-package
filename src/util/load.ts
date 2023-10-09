@@ -12,6 +12,7 @@ import { Errors } from '../structs/errors/constants.js';
 import { ModalSubmitInteractionController } from '../controllers/modal-submit-interaction.controller.js';
 
 export async function loadCommands(
+  publicKey: string,
   router: findMyWay.Instance<findMyWay.HTTPVersion.V1>,
   path: string,
   prefix: string,
@@ -23,18 +24,19 @@ export async function loadCommands(
   if (!canAccess) return;
   for (const dirent of await readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
-      await loadCommands(router, join(path, dirent.name), joinRoute(prefix, dirent.name), store);
+      await loadCommands(publicKey, router, join(path, dirent.name), joinRoute(prefix, dirent.name), store);
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ApplicationCommandController>(`file://${join(path, dirent.name)}`);
       const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', '')));
       store.set(route, controllerInstance);
-      loadRoute(router, route, controllerInstance);
+      loadRoute(publicKey, router, route, controllerInstance);
     }
   }
 }
 
 export async function loadComponents(
+  publicKey: string,
   router: findMyWay.Instance<findMyWay.HTTPVersion.V1>,
   path: string,
   prefix: string,
@@ -46,18 +48,19 @@ export async function loadComponents(
   if (!canAccess) return;
   for (const dirent of await readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
-      await loadComponents(router, join(path, dirent.name), joinRoute(prefix, dirent.name), store);
+      await loadComponents(publicKey, router, join(path, dirent.name), joinRoute(prefix, dirent.name), store);
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ComponentInteractionController>(`file://${join(path, dirent.name.replace('.js', ''))}`);
       const route = buildRoute(joinRoute(prefix, controllerInstance.componentType.toString(), dirent.name === 'index.js' ? '' : dirent.name));
       store.set(route, controllerInstance);
-      loadRoute(router, route, controllerInstance);
+      loadRoute(publicKey, router, route, controllerInstance);
     }
   }
 }
 
 export async function loadModals(
+  publicKey: string,
   router: findMyWay.Instance<findMyWay.HTTPVersion.V1>,
   path: string,
   prefix: string,
@@ -69,18 +72,19 @@ export async function loadModals(
   if (!canAccess) return;
   for (const dirent of await readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
-      await loadModals(router, join(path, dirent.name), joinRoute(prefix, dirent.name), store);
+      await loadModals(publicKey, router, join(path, dirent.name), joinRoute(prefix, dirent.name), store);
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ModalSubmitInteractionController>(`file://${join(path, dirent.name)}`);
       const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', '')));
       store.set(route, controllerInstance);
-      loadRoute(router, route, controllerInstance);
+      loadRoute(publicKey, router, route, controllerInstance);
     }
   }
 }
 
 export async function loadAutocomplete(
+  publicKey: string,
   router: findMyWay.Instance<findMyWay.HTTPVersion.V1>,
   path: string,
   prefix: string,
@@ -92,20 +96,20 @@ export async function loadAutocomplete(
   if (!canAccess) return;
   for (const dirent of await readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
-      await loadAutocomplete(router, join(path, dirent.name), joinRoute(prefix, dirent.name), store);
+      await loadAutocomplete(publicKey, router, join(path, dirent.name), joinRoute(prefix, dirent.name), store);
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<AutocompleteInteractionController>(`file://${join(path, dirent.name)}`);
       const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''), controllerInstance.option));
       store.set(route, controllerInstance);
-      loadRoute(router, route, controllerInstance);
+      loadRoute(publicKey, router, route, controllerInstance);
     }
   }
 }
 
-function loadRoute<T extends never>(router: findMyWay.Instance<findMyWay.HTTPVersion.V1>, route: string, controller: AnyController) {
+function loadRoute<T extends never>(publicKey: string, router: findMyWay.Instance<findMyWay.HTTPVersion.V1>, route: string, controller: AnyController) {
   router.post(route, function (this: { data: unknown; buffer: Buffer }, req, res, params) {
-    const verified = verifyRequest(req, this.buffer);
+    const verified = verifyRequest(publicKey, req, this.buffer);
     if (!verified) return Errors.Unauthorized(res);
     controller.handler(req, res, params, this.data as T);
   });
