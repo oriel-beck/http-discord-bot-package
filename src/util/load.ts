@@ -27,7 +27,7 @@ export async function loadCommands(
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ApplicationCommandController>(`file://${join(path, dirent.name)}`);
-      const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name));
+      const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace(".js", "")));
       store.set(route, controllerInstance);
       loadRoute(router, route, controllerInstance);
     }
@@ -49,7 +49,7 @@ export async function loadComponents(
       await loadComponents(router, join(path, dirent.name), joinRoute(prefix, dirent.name), store);
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const controllerInstance = await getController<ComponentInteractionController>(`file://${join(path, dirent.name)}`);
+      const controllerInstance = await getController<ComponentInteractionController>(`file://${join(path, dirent.name.replace(".js", ""))}`);
       const route = buildRoute(joinRoute(prefix, controllerInstance.componentType.toString(), dirent.name === 'index.js' ? '' : dirent.name));
       store.set(route, controllerInstance);
       loadRoute(router, route, controllerInstance);
@@ -73,7 +73,7 @@ export async function loadModals(
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ModalSubmitInteractionController>(`file://${join(path, dirent.name)}`);
-      const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name));
+      const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace(".js", "")));
       store.set(route, controllerInstance);
       loadRoute(router, route, controllerInstance);
     }
@@ -96,7 +96,7 @@ export async function loadAutocomplete(
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<AutocompleteInteractionController>(`file://${join(path, dirent.name)}`);
-      const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name, controllerInstance.option));
+      const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace(".js", ""), controllerInstance.option));
       store.set(route, controllerInstance);
       loadRoute(router, route, controllerInstance);
     }
