@@ -1,26 +1,33 @@
 import type { ComponentType } from 'discord-api-types/v10';
-import type { RouteSettingsMode, ValueOf } from '../util';
 import type { ApplicationCommandController } from './application-command.controller';
 import type { ComponentInteractionController } from './component-interaction.controller';
 import type { AutocompleteInteractionController } from './autocomplete-interaction.controller';
 import type { ModalSubmitInteractionController } from './modal-submit-interaction.controller';
 
-export interface BaseControllerSettings {
-  name?: string;
-  routeSettings?: RouteSettings;
-}
-
-export interface ComponentInteractionControllerSettings extends BaseControllerSettings {
+export interface ComponentInteractionControllerSettings {
   componentType: Omit<ComponentType, 'ActionRow'>;
+  /**
+   * This option accepts a route path in accordance to `find-my-way` documentation.
+   */
+  customId: string;
 }
 
-export interface AutocompleteInteractionControllerSettings extends BaseControllerSettings {
+export interface AutocompleteInteractionControllerSettings {
+  /**
+   * The name of the option of the command this autocompletes for.
+   */
   option: string;
+  /**
+   * The command name this autocompletes for.
+   */
+  commandName: string;
 }
 
-export interface RouteSettings {
-  route: string;
-  mode?: ValueOf<typeof RouteSettingsMode>;
+export interface ModalSubmitInteractionControllerSettings {
+  /**
+   * This option accepts a route path in accordance to `find-my-way` documentation.
+   */
+  customId: string;
 }
 
 export type AnyController =

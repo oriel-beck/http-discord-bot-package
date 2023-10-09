@@ -12,11 +12,6 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "newLine": "lf",
-    "noEmitHelpers": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "preserveConstEnums": true,
     "pretty": true,
     "removeComments": false,
@@ -30,5 +25,7 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

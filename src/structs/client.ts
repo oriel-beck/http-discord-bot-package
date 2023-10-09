@@ -3,20 +3,18 @@ import http, { type IncomingMessage, type ServerResponse } from 'http';
 import pino, { type Logger, type LoggerOptions } from 'pino';
 import findMyWay from 'find-my-way';
 import { InteractionType } from 'discord-api-types/v10';
-import { Errors } from '../util/constants';
-import { verifyKey } from 'discord-interactions';
 import { REST, type RESTOptions } from '@discordjs/rest';
-import { SuperMap } from '@thunder04/supermap';
+import SuperMap from '@thunder04/supermap';
 
-import { walkRoutes } from '../util/load';
-import { getRootPath } from '../util/util';
-import {
-  ApplicationCommandController,
-  AutocompleteInteractionController,
-  ComponentInteractionController,
-  ModalSubmitInteractionController,
-} from '../controllers';
-import { IncorrectTypeError, ValidationError } from './errors';
+import { loadAutocomplete, loadCommands, loadComponents, loadModals } from '../util/load';
+import { ApplicationCommandController } from '../controllers/application-command.controller';
+import { ComponentInteractionController } from '../controllers/component-interaction.controller';
+import { ModalSubmitInteractionController } from '../controllers/modal-submit-interaction.controller';
+import { AutocompleteInteractionController } from '../controllers/autocomplete-interaction.controller';
+import { ValidationError } from './errors/validation.error';
+import { IncorrectTypeError } from './errors/incorrect-type.error';
+import { Errors } from './errors/constants';
+import { getRootPath, verifyRequest } from '../util/util';
 
 export class HttpOnlyBot {
   stores = {
@@ -30,17 +28,20 @@ export class HttpOnlyBot {
   logger: Logger;
   router: findMyWay.Instance<findMyWay.HTTPVersion.V1>;
 
-  constructor(opts: HttpBotClientOptions) {
+  constructor(opts?: HttpBotClientOptions) {
     this.logger = pino({
       level: 'debug',
       name: 'http-only-bot',
-      ...opts.logger,
+      ...opts?.loggerOptions,
     });
-    this.router = findMyWay(opts.router);
-    this.rest = new REST(opts.djsRest);
+    this.router = findMyWay({
+      defaultRoute: (req, res) => (opts?.defaultRoute ? opts.defaultRoute(req, res) : {}),
+      ...opts?.routerOptions,
+    });
+    this.rest = new REST(opts?.djsRestOptions);
   }
 
-  async login(token: string) {
+  async login(token: string, callback?: () => unknown) {
     if (!token) throw new ValidationError('Missing argument "token"');
     if (typeof token !== 'string') throw new IncorrectTypeError('token', 'string', typeof token);
     const applicationId = Buffer.from(token.split('.').at(0)!, 'base64').toString('ascii');
@@ -50,29 +51,32 @@ export class HttpOnlyBot {
 
     this.logger.info('Initiating commands');
     let ts = Date.now();
-    await walkRoutes(this.router, join(maindir, 'commands'), this.logger, this.stores.commands, 'commands');
+    await loadCommands(this.router, join(maindir, 'commands'), 'commands', this.stores.commands);
     this.logger.info(`Initiated commands in ${Date.now() - ts}ms`);
 
     this.logger.info('Initiating componenets');
     ts = Date.now();
-    await walkRoutes(this.router, join(maindir, 'components'), this.logger, this.stores.components, 'components');
+    await loadComponents(this.router, join(maindir, 'components'), 'components', this.stores.components);
     this.logger.info(`Initiated components in ${Date.now() - ts}ms`);
 
     this.logger.info('Initiating modals');
     ts = Date.now();
-    await walkRoutes(this.router, join(maindir, 'modals'), this.logger, this.stores.modals, 'modals');
+    await loadModals(this.router, join(maindir, 'modals'), 'modals', this.stores.modals);
     this.logger.info(`Initiated modals in ${Date.now() - ts}ms`);
 
     this.logger.info('Initiating autocomplete');
     ts = Date.now();
-    await walkRoutes(this.router, join(maindir, 'autocomplete'), this.logger, this.stores.autocomplete, 'autocomplete');
+    await loadAutocomplete(this.router, join(maindir, 'autocomplete'), 'autocomplete', this.stores.autocomplete);
     this.logger.info(`Initiated autocomplete in ${Date.now() - ts}ms`);
 
     this.logger.info('Initiating server');
-    this.server.on('listening', () => this.logger.info('Server is listening'));
-    this.server.listen(5000, '0.0.0.0');
-
     this.initInitialListener();
+
+    return new Promise<void>((res, rej) => {
+      this.server.listen(5000, '0.0.0.0', callback);
+      this.server.once("listening", () => res());
+      this.server.once("error", (err) => rej(err));
+    });
   }
 
   private initInitialListener() {
@@ -94,7 +98,7 @@ export class HttpOnlyBot {
         if (req.url === '/interactions') {
           this.defaultInteractionRoute(req, res, data, chunks);
         }
-        this.router.lookup(req, res, { data, buf: chunks });
+        this.router.lookup(req, res, { data, buffer: chunks });
         /* eslint-enable */
       });
     });
@@ -107,22 +111,15 @@ export class HttpOnlyBot {
     buffer: Buffer,
   ) {
     res.setHeader('Content-Type', 'application/json');
-    if (req.headers['content-type'] !== 'application/json') return Errors.Unauthorized(res);
 
-    const signature = req.headers['x-signature-ed25519'] as string | undefined;
-    if (!signature) return Errors.Unauthorized(res);
-
-    const timestamp = req.headers['x-signature-timestamp'] as string | undefined;
-    if (!timestamp) return Errors.Unauthorized(res);
-
-    const isValidRequest = verifyKey(buffer, signature, timestamp, process.env.APPLICATION_PUBLIC_KEY!);
-    if (!isValidRequest) return Errors.Unauthorized(res);
+    const verified = verifyRequest(req, buffer);
+    if (verified) return Errors.Unauthorized(res);
     switch (data.type) {
       case InteractionType.Ping:
         return res.end(JSON.stringify({ type: InteractionType.Ping }));
       case InteractionType.ApplicationCommand:
         req.url = `/commands/${data.data.name}`;
-        this.router.lookup(req, res, { data });
+        this.router.lookup(req, res, { data, buffer });
         break;
       case InteractionType.MessageComponent:
         break;
@@ -138,8 +135,8 @@ export class HttpOnlyBot {
 }
 
 export interface HttpBotClientOptions {
-  logger: LoggerOptions;
-  router: findMyWay.Config<findMyWay.HTTPVersion.V1>;
-  djsRest: Partial<RESTOptions>;
-  defaultRoute(req: IncomingMessage, res: ServerResponse<IncomingMessage>): unknown;
+  loggerOptions?: LoggerOptions;
+  routerOptions?: findMyWay.Config<findMyWay.HTTPVersion.V1>;
+  djsRestOptions?: Partial<RESTOptions>;
+  defaultRoute?(req: IncomingMessage, res: ServerResponse<IncomingMessage>): unknown;
 }
