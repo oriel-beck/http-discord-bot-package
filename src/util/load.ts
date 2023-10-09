@@ -112,19 +112,3 @@ async function getController<T>(path: string) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   return new (await import(path)).default() as T;
 }
-
-/*
-Plan for commands:
-/commands
-  /applications (group)
-    /deny.ts (subcommand)
-  /applications (group)
-    /deny (name for subcommand)
-      /index.ts (subcommand)
-  /applications (group)
-    /deny (subcommand)
-      /deny.ts (error)
-  /ping.ts (command)
-  /help
-    /index.ts (command)
-*/
