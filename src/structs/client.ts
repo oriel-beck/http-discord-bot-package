@@ -27,6 +27,8 @@ export class HttpOnlyBot {
   server = http.createServer();
   logger: Logger;
   router: findMyWay.Instance<findMyWay.HTTPVersion.V1>;
+  port: number;
+  host: string | undefined;
 
   constructor(opts?: HttpBotClientOptions) {
     this.logger = pino({
@@ -39,6 +41,8 @@ export class HttpOnlyBot {
       ...opts?.routerOptions,
     });
     this.rest = new REST(opts?.djsRestOptions);
+    this.port = opts?.port || 5000;
+    this.host = opts?.host
   }
 
   async login(token: string, callback?: () => unknown) {
@@ -73,7 +77,7 @@ export class HttpOnlyBot {
     this.initInitialListener();
 
     return new Promise<void>((res, rej) => {
-      this.server.listen(5000, '0.0.0.0', callback);
+      this.server.listen(this.port, this.host, callback);
       this.server.once('listening', () => res());
       this.server.once('error', (err) => rej(err));
     });
@@ -148,6 +152,8 @@ export class HttpOnlyBot {
 }
 
 export interface HttpBotClientOptions {
+  port?: number;
+  host?: string;
   loggerOptions?: LoggerOptions;
   routerOptions?: findMyWay.Config<findMyWay.HTTPVersion.V1>;
   djsRestOptions?: Partial<RESTOptions>;
