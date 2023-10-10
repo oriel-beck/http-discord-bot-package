@@ -2,7 +2,7 @@ import { join } from 'path';
 import http, { type IncomingMessage, type ServerResponse } from 'http';
 import pino, { type Logger, type LoggerOptions } from 'pino';
 import findMyWay from 'find-my-way';
-import { APIInteraction, ComponentType, InteractionResponseType, InteractionType, Routes } from 'discord-api-types/v10';
+import { APIInteraction, InteractionResponseType, InteractionType, Routes } from 'discord-api-types/v10';
 import { REST, type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
 
@@ -128,36 +128,35 @@ export class HttpOnlyBot {
   private defaultInteractionRoute(
     req: IncomingMessage,
     res: ServerResponse<IncomingMessage>,
-    data: { type: InteractionType; data: { name?: string; custom_id?: string; component_type?: ComponentType } },
+    data: APIInteraction,
     buffer: Buffer,
   ) {
     res.setHeader('Content-Type', 'application/json');
 
     const verified = verifyRequest(this.#publicKey, req, buffer);
     if (!verified) return Errors.Unauthorized(res);
-    let ctx: BaseContext<APIInteraction>;
+    // TODO: break to smaller contexes later? (with `this is ...Context`)
+    const ctx = new BaseContext(this.rest, data, this);
     switch (data.type) {
       case InteractionType.Ping:
         return res.writeHead(200).end(JSON.stringify({ type: InteractionResponseType.Pong }));
       case InteractionType.ApplicationCommand:
         req.url = `/commands/${data.data.name}`;
-        // TODO: break to smaller contexes later
-        ctx = new BaseContext(this.rest, data as APIInteraction, this);
-        this.router.lookup(req, res, { ctx, buffer });
         break;
       case InteractionType.MessageComponent:
         req.url = `/components/${data.data.component_type}/${data.data.custom_id}`;
-        ctx = new BaseContext(this.rest, data as APIInteraction, this);
-        this.router.lookup(req, res, { ctx, buffer });
         break;
       case InteractionType.ApplicationCommandAutocomplete:
+        // TODO: add /{focused_option_name}
+        req.url = `/autocomplete/${data.data.name}`
         break;
       case InteractionType.ModalSubmit:
+        req.url = `/modals/${data.data.custom_id}`;
         break;
       default:
-        Errors.Unauthorized(res);
+        return Errors.Unauthorized(res);
     }
-    return;
+    this.router.lookup(req, res, { ctx, buffer });
   }
 }
 

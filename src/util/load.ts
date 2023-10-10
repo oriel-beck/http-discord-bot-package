@@ -30,7 +30,7 @@ export async function loadCommands(
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ApplicationCommandController>(`file://${join(path, dirent.name)}`);
-      const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', '')));
+      const route = genRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''));
       store.set(route, controllerInstance);
       loadRoute(publicKey, router, route, controllerInstance);
     }
@@ -56,7 +56,8 @@ export async function loadComponents(
       const controllerInstance = await getController<ComponentInteractionController>(`file://${join(path, dirent.name)}`);
       const split = prefix.split('/');
       split.splice(1, 0, controllerInstance.componentType.toString());
-      const route = buildRoute(joinRoute(split.join('/'), dirent.name === 'index.js' ? '' : dirent.name.replace('.js', '')));
+      // TODO: settings.customId should bypass the route generation
+      const route = genRoute(split.join('/'), dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''));
       store.set(route, controllerInstance);
       loadRoute(publicKey, router, route, controllerInstance);
     }
@@ -80,7 +81,8 @@ export async function loadModals(
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ModalSubmitInteractionController>(`file://${join(path, dirent.name)}`);
-      const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', '')));
+      // TODO: settings.customId should bypass the route generation
+      const route = genRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''));
       store.set(route, controllerInstance);
       loadRoute(publicKey, router, route, controllerInstance);
     }
@@ -104,7 +106,7 @@ export async function loadAutocomplete(
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<AutocompleteInteractionController>(`file://${join(path, dirent.name)}`);
-      const route = buildRoute(joinRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''), controllerInstance.option));
+      const route = genRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''), controllerInstance.option);
       store.set(route, controllerInstance);
       loadRoute(publicKey, router, route, controllerInstance);
     }
@@ -120,8 +122,13 @@ function loadRoute(publicKey: string, router: findMyWay.Instance<findMyWay.HTTPV
   });
 }
 
-const buildRoute = (route: string) => `/${route.replace(/\[([^)]+)\]/g, ':$1')}`;
 async function getController<T>(path: string) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   return new (await import(path)).default() as T;
+}
+
+function genRoute(...parts: string[]) {
+  let route = joinRoute(...parts)
+  route = route[route.length - 1] === '/' ? route.substring(0, route.length - 1) : route;
+  return `/${route.replace(/\[([^)]+)\]/g, ':$1')}`;
 }

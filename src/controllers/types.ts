@@ -9,7 +9,7 @@ export interface ComponentInteractionControllerSettings {
   /**
    * This option accepts a route path in accordance to `find-my-way` documentation.
    */
-  customId: string;
+  customId?: string;
 }
 
 export interface AutocompleteInteractionControllerSettings {
@@ -27,7 +27,7 @@ export interface ModalSubmitInteractionControllerSettings {
   /**
    * This option accepts a route path in accordance to `find-my-way` documentation.
    */
-  customId: string;
+  customId?: string;
 }
 
 export type AnyController =
