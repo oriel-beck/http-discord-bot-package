@@ -1,5 +1,6 @@
-import type { IncomingMessage, ServerResponse } from 'http';
+import type { APIInteraction } from 'discord-api-types/v10';
+import type { BaseContext } from '../structs/contextes/base.context';
 
-export abstract class BaseController {
-  abstract handler(req: IncomingMessage, res: ServerResponse<IncomingMessage>, params: Record<string, string | undefined>, data: unknown): unknown;
+export abstract class BaseController<T extends APIInteraction> {
+  abstract handler(context: BaseContext<T>): unknown;
 }

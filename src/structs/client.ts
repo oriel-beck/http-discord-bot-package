@@ -2,7 +2,7 @@ import { join } from 'path';
 import http, { type IncomingMessage, type ServerResponse } from 'http';
 import pino, { type Logger, type LoggerOptions } from 'pino';
 import findMyWay from 'find-my-way';
-import { InteractionType, Routes } from 'discord-api-types/v10';
+import { APIInteraction, InteractionResponseType, InteractionType, Routes } from 'discord-api-types/v10';
 import { REST, type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
 
@@ -13,6 +13,7 @@ import { ModalSubmitInteractionController } from '../controllers/modal-submit-in
 import { AutocompleteInteractionController } from '../controllers/autocomplete-interaction.controller';
 import { Errors } from './errors/constants';
 import { getRootPath, validateOptions, verifyRequest } from '../util/util';
+import { BaseContext } from './contextes/base.context';
 
 export class HttpOnlyBot {
   #publicKey: string;
@@ -116,8 +117,9 @@ export class HttpOnlyBot {
         }
         if (req.url === '/interactions') {
           this.defaultInteractionRoute(req, res, data, chunks);
+        } else {
+          this.router.lookup(req, res, { data, buffer: chunks });
         }
-        this.router.lookup(req, res, { data, buffer: chunks });
         /* eslint-enable */
       });
     });
@@ -135,10 +137,13 @@ export class HttpOnlyBot {
     if (!verified) return Errors.Unauthorized(res);
     switch (data.type) {
       case InteractionType.Ping:
-        return res.writeHead(200).end(JSON.stringify({ type: InteractionType.Ping }));
+        return res.writeHead(200).end(JSON.stringify({ type: InteractionResponseType.Pong }));
       case InteractionType.ApplicationCommand:
         req.url = `/commands/${data.data.name}`;
-        this.router.lookup(req, res, { data, buffer });
+        // TODO: break to smaller contexes later
+        // eslint-disable-next-line no-case-declarations
+        const ctx = new BaseContext(this.rest, data as APIInteraction, this);
+        this.router.lookup(req, res, { ctx, buffer });
         break;
       case InteractionType.MessageComponent:
         break;

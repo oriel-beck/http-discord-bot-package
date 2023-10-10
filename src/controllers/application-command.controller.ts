@@ -1,18 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { APIApplicationCommand, APIApplicationCommandInteraction } from 'discord-api-types/v10';
-import type { IncomingMessage, ServerResponse } from 'http';
+import type { APIApplicationCommandInteraction } from 'discord-api-types/v10';
 import type { SlashCommandBuilder } from '@discordjs/builders';
-
+import type { BaseContext } from '../structs/contextes/base.context';
 import { BaseController } from './base.controller';
 
-export class ApplicationCommandController extends BaseController {
+export class ApplicationCommandController extends BaseController<APIApplicationCommandInteraction> {
   // eslint-disable-next-line
-  handler(
-    req: IncomingMessage,
-    res: ServerResponse<IncomingMessage>,
-    params: Record<string, string | undefined>,
-    data: APIApplicationCommandInteraction,
-  ): unknown {
+  handler(context: BaseContext<APIApplicationCommandInteraction>): unknown {
     throw new Error('Method not implemented');
   }
 

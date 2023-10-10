@@ -10,6 +10,8 @@ import { joinRoute, verifyRequest } from './util.js';
 import { ApplicationCommandController } from '../controllers/application-command.controller.js';
 import { Errors } from '../structs/errors/constants.js';
 import { ModalSubmitInteractionController } from '../controllers/modal-submit-interaction.controller.js';
+import { BaseContext } from '../structs/contextes/base.context.js';
+import { APIInteraction } from 'discord-api-types/v10';
 
 export async function loadCommands(
   publicKey: string,
@@ -107,11 +109,13 @@ export async function loadAutocomplete(
   }
 }
 
-function loadRoute<T extends never>(publicKey: string, router: findMyWay.Instance<findMyWay.HTTPVersion.V1>, route: string, controller: AnyController) {
-  router.post(route, function (this: { data: unknown; buffer: Buffer }, req, res, params) {
+function loadRoute(publicKey: string, router: findMyWay.Instance<findMyWay.HTTPVersion.V1>, route: string, controller: AnyController) {
+  router.post(route, function (this: { ctx: BaseContext<APIInteraction>; buffer: Buffer }, req, res, params) {
     const verified = verifyRequest(publicKey, req, this.buffer);
     if (!verified) return Errors.Unauthorized(res);
-    controller.handler(req, res, params, this.data as T);
+    if (!this.ctx) return;
+    this.ctx.params = params || {};
+    controller.handler(this.ctx as never);
   });
 }
 
