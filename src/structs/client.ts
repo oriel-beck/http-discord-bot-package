@@ -132,10 +132,10 @@ export class HttpOnlyBot {
     res.setHeader('Content-Type', 'application/json');
 
     const verified = verifyRequest(this.#publicKey, req, buffer);
-    if (verified) return Errors.Unauthorized(res);
+    if (!verified) return Errors.Unauthorized(res);
     switch (data.type) {
       case InteractionType.Ping:
-        return res.end(JSON.stringify({ type: InteractionType.Ping }));
+        return res.writeHead(200).end(JSON.stringify({ type: InteractionType.Ping }));
       case InteractionType.ApplicationCommand:
         req.url = `/commands/${data.data.name}`;
         this.router.lookup(req, res, { data, buffer });
