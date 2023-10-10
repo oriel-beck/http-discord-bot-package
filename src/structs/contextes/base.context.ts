@@ -22,8 +22,8 @@ export class BaseContext<T extends APIInteraction> {
   } = {};
   constructor(
     private rest: REST,
-    private data: T,
-    private client: HttpOnlyBot,
+    public data: T,
+    public client: HttpOnlyBot,
   ) {}
   async reply(message: MessagePayload<APIInteractionResponseChannelMessageWithSource['data']>) {
     const files = message.attachments;

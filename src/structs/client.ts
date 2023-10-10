@@ -2,7 +2,7 @@ import { join } from 'path';
 import http, { type IncomingMessage, type ServerResponse } from 'http';
 import pino, { type Logger, type LoggerOptions } from 'pino';
 import findMyWay from 'find-my-way';
-import { APIInteraction, InteractionResponseType, InteractionType, Routes } from 'discord-api-types/v10';
+import { APIInteraction, ComponentType, InteractionResponseType, InteractionType, Routes } from 'discord-api-types/v10';
 import { REST, type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
 
@@ -128,24 +128,27 @@ export class HttpOnlyBot {
   private defaultInteractionRoute(
     req: IncomingMessage,
     res: ServerResponse<IncomingMessage>,
-    data: { type: InteractionType; data: { name?: string; custom_id?: string } },
+    data: { type: InteractionType; data: { name?: string; custom_id?: string; component_type?: ComponentType } },
     buffer: Buffer,
   ) {
     res.setHeader('Content-Type', 'application/json');
 
     const verified = verifyRequest(this.#publicKey, req, buffer);
     if (!verified) return Errors.Unauthorized(res);
+    let ctx: BaseContext<APIInteraction>;
     switch (data.type) {
       case InteractionType.Ping:
         return res.writeHead(200).end(JSON.stringify({ type: InteractionResponseType.Pong }));
       case InteractionType.ApplicationCommand:
         req.url = `/commands/${data.data.name}`;
         // TODO: break to smaller contexes later
-        // eslint-disable-next-line no-case-declarations
-        const ctx = new BaseContext(this.rest, data as APIInteraction, this);
+        ctx = new BaseContext(this.rest, data as APIInteraction, this);
         this.router.lookup(req, res, { ctx, buffer });
         break;
       case InteractionType.MessageComponent:
+        req.url = `/components/${data.data.component_type}/${data.data.custom_id}`;
+        ctx = new BaseContext(this.rest, data as APIInteraction, this);
+        this.router.lookup(req, res, { ctx, buffer });
         break;
       case InteractionType.ApplicationCommandAutocomplete:
         break;

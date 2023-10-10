@@ -6,3 +6,5 @@ export * from './controllers/modal-submit-interaction.controller';
 export * from './structs/client';
 
 export * from './util/constants';
+
+export * from './structs/contextes/base.context';

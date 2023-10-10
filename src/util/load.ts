@@ -53,8 +53,10 @@ export async function loadComponents(
       await loadComponents(publicKey, router, join(path, dirent.name), joinRoute(prefix, dirent.name), store);
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const controllerInstance = await getController<ComponentInteractionController>(`file://${join(path, dirent.name.replace('.js', ''))}`);
-      const route = buildRoute(joinRoute(prefix, controllerInstance.componentType.toString(), dirent.name === 'index.js' ? '' : dirent.name));
+      const controllerInstance = await getController<ComponentInteractionController>(`file://${join(path, dirent.name)}`);
+      const split = prefix.split('/');
+      split.splice(1, 0, controllerInstance.componentType.toString());
+      const route = buildRoute(joinRoute(split.join('/'), dirent.name === 'index.js' ? '' : dirent.name.replace('.js', '')));
       store.set(route, controllerInstance);
       loadRoute(publicKey, router, route, controllerInstance);
     }
@@ -113,7 +115,6 @@ function loadRoute(publicKey: string, router: findMyWay.Instance<findMyWay.HTTPV
   router.post(route, function (this: { ctx: BaseContext<APIInteraction>; buffer: Buffer }, req, res, params) {
     const verified = verifyRequest(publicKey, req, this.buffer);
     if (!verified) return Errors.Unauthorized(res);
-    if (!this.ctx) return;
     this.ctx.params = params || {};
     controller.handler(this.ctx as never);
   });
