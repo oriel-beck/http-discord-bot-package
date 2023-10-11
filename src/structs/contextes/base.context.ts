@@ -24,10 +24,10 @@ export class BaseContext<T extends APIInteraction> {
     public data: T,
     public client: HttpOnlyBot,
   ) {}
-  async reply(message: MessagePayload<APIInteractionResponseChannelMessageWithSource['data']>) {
+  async reply(message: MessagePayload<APIInteractionResponseChannelMessageWithSource['data']>, returnReply = false) {
     const files = message.attachments;
     delete message.attachments;
-    return await this.client.rest.post(Routes.interactionCallback(this.data.id, this.data.token), {
+    await this.client.rest.post(Routes.interactionCallback(this.data.id, this.data.token), {
       files,
       body: {
         type: InteractionResponseType.ChannelMessageWithSource,
@@ -36,6 +36,7 @@ export class BaseContext<T extends APIInteraction> {
         },
       },
     });
+    if (returnReply) return await this.getMessage();
   }
 
   async deferWithSource(ephemeral: boolean) {
@@ -52,7 +53,6 @@ export class BaseContext<T extends APIInteraction> {
     return await this.interactionCallback(InteractionResponseType.Modal, modal.toJSON());
   }
 
-  // TODO: figure out input for this
   async autocomplete(choices: ({ name: string, value: string })[]) {
     if (this.data.type !== InteractionType.ApplicationCommandAutocomplete) throw new Error(cannotUseError);
     if (choices.length > 25) throw new Error("[autocomplete]: Cannot send over 25 choices!");
@@ -61,7 +61,7 @@ export class BaseContext<T extends APIInteraction> {
 
   /**
    *
-   * @param messageId Optional, defaults to @original
+   * @param messageId Optional, defaults to the original message
    * @returns {APIMessage}
    */
   async getMessage(messageId?: string) {
@@ -70,7 +70,7 @@ export class BaseContext<T extends APIInteraction> {
 
   /**
    *
-   * @param messageId Optional, defaults to @original
+   * @param messageId Optional, defaults to the original message
    * @returns {APIMessage}
    */
   async updateMessage(message: MessagePayload<APIInteractionResponseUpdateMessage>, messageId?: string) {
