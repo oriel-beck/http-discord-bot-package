@@ -5,10 +5,10 @@ import type { BaseContext } from '../structs/contextes/base.context';
 import { BaseController } from './base.controller';
 
 export class ComponentInteractionController extends BaseController<APIMessageComponentInteraction> {
-  componentType: ComponentInteractionControllerSettings['componentType'];
+  componentType!: ComponentInteractionControllerSettings['componentType'];
   constructor(settings: ComponentInteractionControllerSettings) {
     super();
-    this.componentType = settings.componentType;
+    this.componentType = settings?.componentType || this?.componentType;
   }
 
   handler(context: BaseContext<APIMessageComponentInteraction>): unknown {

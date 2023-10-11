@@ -139,7 +139,7 @@ export class HttpOnlyBot {
       return Errors.Unauthorized(res);
     }
     // TODO: break to smaller contexes later? (with `this is ...Context`)
-    const ctx = new BaseContext(this.rest, data, this);
+    const ctx = new BaseContext(data, this);
     switch (data.type) {
       case InteractionType.Ping:
         return res.writeHead(200).end(JSON.stringify({ type: InteractionResponseType.Pong }));
@@ -151,7 +151,7 @@ export class HttpOnlyBot {
         break;
       case InteractionType.ApplicationCommandAutocomplete:
         // TODO: add /{focused_option_name}
-        req.url = `/autocomplete/${data.data.name}${data.data.options.find((opt: APIApplicationCommandInteractionDataOption & { focused?: boolean }) => opt?.focused === true)?.name}`;
+        req.url = `/autocomplete/${data.data.name}/${data.data.options.find((opt: APIApplicationCommandInteractionDataOption & { focused?: boolean }) => opt?.focused === true)?.name}`;
         break;
       case InteractionType.ModalSubmit:
         req.url = `/modals/${data.data.custom_id}`;

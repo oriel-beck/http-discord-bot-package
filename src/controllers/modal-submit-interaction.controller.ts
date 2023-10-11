@@ -5,10 +5,10 @@ import type { BaseContext } from '../structs/contextes/base.context';
 import { BaseController } from './base.controller';
 
 export class ModalSubmitInteractionController extends BaseController<APIModalSubmitInteraction> {
-  customId?: string;
+  customId!: string;
   constructor(settings?: ModalSubmitInteractionControllerSettings) {
     super();
-    this.customId = settings?.customId;
+    this.customId = settings?.customId || this?.customId;
   }
   handler(context: BaseContext<APIModalSubmitInteraction>): unknown {
     throw new Error('Method not implemented');

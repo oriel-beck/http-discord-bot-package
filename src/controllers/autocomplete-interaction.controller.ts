@@ -5,12 +5,12 @@ import type { BaseContext } from '../structs/contextes/base.context';
 import { BaseController } from './base.controller';
 
 export class AutocompleteInteractionController extends BaseController<APIApplicationCommandAutocompleteInteraction> {
-  option: AutocompleteInteractionControllerSettings['option'];
-  commandName: string;
+  option!: AutocompleteInteractionControllerSettings['option'];
+  commandName!: string;
   constructor(settings: AutocompleteInteractionControllerSettings) {
     super();
-    this.option = settings.option;
-    this.commandName = settings.commandName;
+    this.option = settings?.option || this?.option;
+    this.commandName = settings?.commandName || this?.commandName;
   }
 
   handler(context: BaseContext<APIApplicationCommandAutocompleteInteraction>): unknown {

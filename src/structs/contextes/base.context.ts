@@ -21,14 +21,13 @@ export class BaseContext<T extends APIInteraction> {
     [k: string]: string | undefined;
   } = {};
   constructor(
-    private rest: REST,
     public data: T,
     public client: HttpOnlyBot,
   ) {}
   async reply(message: MessagePayload<APIInteractionResponseChannelMessageWithSource['data']>) {
     const files = message.attachments;
     delete message.attachments;
-    return await this.rest.post(Routes.interactionCallback(this.data.id, this.data.token), {
+    return await this.client.rest.post(Routes.interactionCallback(this.data.id, this.data.token), {
       files,
       body: {
         type: InteractionResponseType.ChannelMessageWithSource,
@@ -54,9 +53,10 @@ export class BaseContext<T extends APIInteraction> {
   }
 
   // TODO: figure out input for this
-  async autocomplete() {
+  async autocomplete(choices: ({ name: string, value: string })[]) {
     if (this.data.type !== InteractionType.ApplicationCommandAutocomplete) throw new Error(cannotUseError);
-    return await this.interactionCallback(InteractionResponseType.ApplicationCommandAutocompleteResult);
+    if (choices.length > 25) throw new Error("[autocomplete]: Cannot send over 25 choices!");
+    return await this.interactionCallback(InteractionResponseType.ApplicationCommandAutocompleteResult, { choices });
   }
 
   /**
@@ -65,7 +65,7 @@ export class BaseContext<T extends APIInteraction> {
    * @returns {APIMessage}
    */
   async getMessage(messageId?: string) {
-    return await this.rest.get(Routes.webhookMessage(this.client.applicationId, this.data.token, messageId || '@original'));
+    return await this.client.rest.get(Routes.webhookMessage(this.client.applicationId, this.data.token, messageId || '@original'));
   }
 
   /**
@@ -76,7 +76,7 @@ export class BaseContext<T extends APIInteraction> {
   async updateMessage(message: MessagePayload<APIInteractionResponseUpdateMessage>, messageId?: string) {
     const files = message.attachments;
     delete message.attachments;
-    return await this.rest.patch(Routes.webhookMessage(this.client.applicationId, this.data.token, messageId || '@original'), {
+    return await this.client.rest.patch(Routes.webhookMessage(this.client.applicationId, this.data.token, messageId || '@original'), {
       files,
       body: {
         data: {
@@ -92,13 +92,13 @@ export class BaseContext<T extends APIInteraction> {
    * @returns {unknown}
    */
   async deleteMessage(messageId?: string) {
-    return await this.rest.delete(Routes.webhookMessage(this.client.applicationId, this.data.token, messageId || '@original'));
+    return await this.client.rest.delete(Routes.webhookMessage(this.client.applicationId, this.data.token, messageId || '@original'));
   }
 
   async followUp(message: MessagePayload<APIInteractionResponseChannelMessageWithSource>) {
     const files = message.attachments;
     delete message.attachments;
-    return await this.rest.post(Routes.webhook(this.client.applicationId, this.data.token), {
+    return await this.client.rest.post(Routes.webhook(this.client.applicationId, this.data.token), {
       body: {
         files,
         data: {
@@ -111,7 +111,7 @@ export class BaseContext<T extends APIInteraction> {
   // TODO: add premium required when available
 
   private interactionCallback(type: InteractionResponseType, data?: unknown) {
-    return this.rest.post(Routes.interactionCallback(this.data.id, this.data.token), {
+    return this.client.rest.post(Routes.interactionCallback(this.data.id, this.data.token), {
       body: {
         type,
         data,
