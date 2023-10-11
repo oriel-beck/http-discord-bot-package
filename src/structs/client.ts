@@ -136,7 +136,7 @@ export class HttpOnlyBot {
       case InteractionType.Ping:
         return res.writeHead(200).end(JSON.stringify({ type: InteractionResponseType.Pong }));
       case InteractionType.ApplicationCommand:
-        req.url = `/commands/${data.data.name}`;
+        req.url = `/commands/${data.data.type}/${data.data.name}`;
         break;
       case InteractionType.MessageComponent:
         req.url = `/components/${data.data.component_type}/${data.data.custom_id}`;

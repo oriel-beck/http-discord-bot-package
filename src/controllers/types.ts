@@ -1,4 +1,4 @@
-import type { ComponentType } from 'discord-api-types/v10';
+import type { ApplicationCommandType, ComponentType } from 'discord-api-types/v10';
 import type { ApplicationCommandController } from './application-command.controller';
 import type { ComponentInteractionController } from './component-interaction.controller';
 import type { AutocompleteInteractionController } from './autocomplete-interaction.controller';
@@ -31,6 +31,10 @@ export interface ModalSubmitInteractionControllerSettings {
    * This option accepts a route path in accordance to `find-my-way` documentation.
    */
   customId?: string;
+}
+
+export interface ApplicationCommandControllerSettings {
+  type: ApplicationCommandType;
 }
 
 export type AnyController =
