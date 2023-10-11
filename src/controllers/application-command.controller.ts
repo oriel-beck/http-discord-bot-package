@@ -16,6 +16,6 @@ export class ApplicationCommandController extends BaseController<APIApplicationC
     throw new Error('Method not implemented');
   }
 
-  register(): SlashCommandBuilder | ContextMenuCommandBuilder | void {}
+  register(): SlashCommandBuilder | ContextMenuCommandBuilder | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | void {}
   // TODO: add a registry method to get all the data needed to register the command
 }

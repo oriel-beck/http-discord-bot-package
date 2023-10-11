@@ -2,7 +2,7 @@ import { join } from 'path';
 import http, { type IncomingMessage, type ServerResponse } from 'http';
 import pino, { type Logger, type LoggerOptions } from 'pino';
 import findMyWay from 'find-my-way';
-import { APIInteraction, InteractionResponseType, InteractionType, Routes } from 'discord-api-types/v10';
+import { APIApplicationCommandInteractionDataOption, APIInteraction, InteractionResponseType, InteractionType, Routes } from 'discord-api-types/v10';
 import { REST, type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
 
@@ -101,6 +101,8 @@ export class HttpOnlyBot {
 
   private initInitialListener() {
     this.server.on('request', (req, res) => {
+      const originalUrl = req.url;
+      this.logger.debug(`Incoming request ${originalUrl}`);
       let chunks = Buffer.from([]);
 
       req.on('data', (chunk) => {
@@ -122,6 +124,10 @@ export class HttpOnlyBot {
         }
         /* eslint-enable */
       });
+
+      req.on("close", () => {
+        this.logger.debug(`Finished handling request ${originalUrl}${originalUrl === req.url ? '' : ` (${req.url})`}`);
+      });
     });
   }
 
@@ -129,7 +135,9 @@ export class HttpOnlyBot {
     res.setHeader('Content-Type', 'application/json');
 
     const verified = verifyRequest(this.#publicKey, req, buffer);
-    if (!verified) return Errors.Unauthorized(res);
+    if (!verified) {
+      return Errors.Unauthorized(res);
+    }
     // TODO: break to smaller contexes later? (with `this is ...Context`)
     const ctx = new BaseContext(this.rest, data, this);
     switch (data.type) {
@@ -143,7 +151,7 @@ export class HttpOnlyBot {
         break;
       case InteractionType.ApplicationCommandAutocomplete:
         // TODO: add /{focused_option_name}
-        req.url = `/autocomplete/${data.data.name}`;
+        req.url = `/autocomplete/${data.data.name}${data.data.options.find((opt: APIApplicationCommandInteractionDataOption & { focused?: boolean }) => opt?.focused === true)?.name}`;
         break;
       case InteractionType.ModalSubmit:
         req.url = `/modals/${data.data.custom_id}`;
