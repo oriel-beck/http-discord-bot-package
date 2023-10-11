@@ -128,7 +128,7 @@ async function getController<T>(path: string) {
 }
 
 function genRoute(...parts: string[]) {
-  let route = joinRoute(...parts)
+  let route = joinRoute(...parts);
   route = route[route.length - 1] === '/' ? route.substring(0, route.length - 1) : route;
   return `/${route.replace(/\[([^)]+)\]/g, ':$1')}`;
 }

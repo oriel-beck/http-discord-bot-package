@@ -125,12 +125,7 @@ export class HttpOnlyBot {
     });
   }
 
-  private defaultInteractionRoute(
-    req: IncomingMessage,
-    res: ServerResponse<IncomingMessage>,
-    data: APIInteraction,
-    buffer: Buffer,
-  ) {
+  private defaultInteractionRoute(req: IncomingMessage, res: ServerResponse<IncomingMessage>, data: APIInteraction, buffer: Buffer) {
     res.setHeader('Content-Type', 'application/json');
 
     const verified = verifyRequest(this.#publicKey, req, buffer);
@@ -148,7 +143,7 @@ export class HttpOnlyBot {
         break;
       case InteractionType.ApplicationCommandAutocomplete:
         // TODO: add /{focused_option_name}
-        req.url = `/autocomplete/${data.data.name}`
+        req.url = `/autocomplete/${data.data.name}`;
         break;
       case InteractionType.ModalSubmit:
         req.url = `/modals/${data.data.custom_id}`;

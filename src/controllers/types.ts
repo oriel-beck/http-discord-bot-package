@@ -5,7 +5,10 @@ import type { AutocompleteInteractionController } from './autocomplete-interacti
 import type { ModalSubmitInteractionController } from './modal-submit-interaction.controller';
 
 export interface ComponentInteractionControllerSettings {
-  componentType: Omit<ComponentType, 'ActionRow'>;
+  /**
+   * The component this should support, can support any component except ActionRow and TextInput
+   */
+  componentType: Omit<ComponentType, 'ActionRow' | 'TextInput'>;
   /**
    * This option accepts a route path in accordance to `find-my-way` documentation.
    */
