@@ -1,8 +1,13 @@
+import { ModalBuilder } from '@discordjs/builders';
 import { BaseContext } from '@lib/base/base.context';
-import { createModal, deferWithoutSource } from '@lib/contextes/functions';
-import type { APIMessageComponentInteraction } from 'discord-api-types/v10';
+import { type APIMessageComponentInteraction, InteractionResponseType } from 'discord-api-types/v10';
 
 export class ComponentContext extends BaseContext<APIMessageComponentInteraction> {
-  public deferWithoutSource = deferWithoutSource.bind(this);
-  public createModal = createModal.bind(this);
+  async deferWithoutSource() {
+    return await this.interactionCallback(InteractionResponseType.DeferredMessageUpdate);
+  }
+
+  async createModal(modal: ModalBuilder) {
+    return await this.interactionCallback(InteractionResponseType.Modal, modal.toJSON());
+  }
 }
