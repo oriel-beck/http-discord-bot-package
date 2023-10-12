@@ -1,7 +1,7 @@
 import type { ComponentInteractionControllerSettings } from './types';
 import type { APIMessageComponentInteraction } from 'discord-api-types/v10';
-import type { BaseContext } from '../lib/base/base.context';
 import { BaseController } from '../lib/base/base.controller';
+import { ComponentContext } from '../structs/contextes';
 
 export abstract class ComponentInteractionController extends BaseController<APIMessageComponentInteraction> {
   componentType!: ComponentInteractionControllerSettings['componentType'];
@@ -10,5 +10,5 @@ export abstract class ComponentInteractionController extends BaseController<APIM
     this.componentType = settings?.componentType || this?.componentType;
   }
 
-  abstract handler(context: BaseContext<APIMessageComponentInteraction>): never;
+  abstract handler(context: ComponentContext): never;
 }

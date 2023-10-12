@@ -1,7 +1,7 @@
 import type { AutocompleteInteractionControllerSettings } from './types';
 import type { APIApplicationCommandAutocompleteInteraction } from 'discord-api-types/v10';
-import type { BaseContext } from '../lib/base/base.context';
-import { BaseController } from '../lib/base/base.controller';
+import { AutocompleteContext } from '../structs/contextes';
+import { BaseController } from '@lib/base/base.controller';
 
 export abstract class AutocompleteInteractionController extends BaseController<APIApplicationCommandAutocompleteInteraction> {
   option!: AutocompleteInteractionControllerSettings['option'];
@@ -12,5 +12,5 @@ export abstract class AutocompleteInteractionController extends BaseController<A
     this.commandName = settings?.commandName || this?.commandName;
   }
 
-  abstract handler(context: BaseContext<APIApplicationCommandAutocompleteInteraction>): never;
+  abstract handler(context: AutocompleteContext): never;
 }

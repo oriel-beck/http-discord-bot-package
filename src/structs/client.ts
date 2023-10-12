@@ -6,14 +6,11 @@ import { APIApplicationCommandInteractionDataOption, APIInteraction, Interaction
 import { REST, type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
 
-import { loadAutocomplete, loadCommands, loadComponents, loadModals } from '../lib/constants/load';
-import { ApplicationCommandController } from '../controllers/application-command.controller';
-import { ComponentInteractionController } from '../controllers/component-interaction.controller';
-import { ModalSubmitInteractionController } from '../controllers/modal-submit-interaction.controller';
-import { AutocompleteInteractionController } from '../controllers/autocomplete-interaction.controller';
-import { Errors } from '../lib/errors/constants';
-import { getRootPath, validateOptions, verifyRequest } from '../lib/constants/util';
-import { BaseContext } from '../lib/base/base.context';
+import { ApplicationCommandController, AutocompleteInteractionController, ComponentInteractionController, ModalSubmitInteractionController } from '../controllers';
+import { ApplicationCommandContext, AutocompleteContext, ComponentContext, ModalSubmitContext } from '../structs/contextes';
+import { getRootPath, validateOptions, verifyRequest } from '@lib/util/util';
+import { loadAutocomplete, loadCommands, loadComponents, loadModals } from '@lib/util/load';
+import { Errors } from '@lib/errors/constants';
 
 export class HttpOnlyBot {
   #publicKey: string;
@@ -139,24 +136,28 @@ export class HttpOnlyBot {
       return Errors.Unauthorized(res);
     }
     // TODO: break to smaller contexes later? (with `this is ...Context`)
-    const ctx = new BaseContext(data, this);
+    let ctx;
     switch (data.type) {
       case InteractionType.Ping:
         return res.writeHead(200).end(JSON.stringify({ type: InteractionResponseType.Pong }));
       case InteractionType.ApplicationCommand:
         req.url = `/commands/${data.data.type}/${data.data.name}`;
+        ctx = new ApplicationCommandContext(data, this);
         break;
       case InteractionType.MessageComponent:
         req.url = `/components/${data.data.component_type}/${data.data.custom_id}`;
+        ctx = new ComponentContext(data, this);
         break;
       case InteractionType.ApplicationCommandAutocomplete:
         // TODO: add /{focused_option_name}
         req.url = `/autocomplete/${data.data.name}/${data.data.options.find(
           (opt: APIApplicationCommandInteractionDataOption & { focused?: boolean }) => opt?.focused === true,
         )?.name}`;
+        ctx = new AutocompleteContext(data, this);
         break;
       case InteractionType.ModalSubmit:
         req.url = `/modals/${data.data.custom_id}`;
+        ctx = new ModalSubmitContext(data, this);
         break;
       default:
         return Errors.Unauthorized(res);
