@@ -3,6 +3,16 @@
   "version": "0.0.1",
   "description": "A wip discord http bot framework",
   "main": "lib/index.js",
+  "exports": {
+    "import": {
+      "default": "./lib/index.js",
+      "types": "./lib/index.d.ts"
+    },
+    "require": {
+      "default": "./lib/index.js",
+      "types": "./lib/index.d.ts"
+    }
+  },
   "scripts": {
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint . --fix",

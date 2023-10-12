@@ -4,10 +4,7 @@ import { type Logger, type LoggerOptions } from 'pino';
 import findMyWay from 'find-my-way';
 import { REST, type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
-import { ApplicationCommandController } from '../controllers/application-command.controller';
-import { ComponentInteractionController } from '../controllers/component-interaction.controller';
-import { ModalSubmitInteractionController } from '../controllers/modal-submit-interaction.controller';
-import { AutocompleteInteractionController } from '../controllers/autocomplete-interaction.controller';
+import { ApplicationCommandController, AutocompleteInteractionController, ComponentInteractionController, ModalSubmitInteractionController } from '../controllers';
 export declare class HttpOnlyBot {
     #private;
     stores: {
