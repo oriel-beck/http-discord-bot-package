@@ -1,6 +1,6 @@
 import { APIInteraction } from 'discord-api-types/v10';
-import { HttpOnlyBot } from '../../structs/client';
 import { deferWithSource, deleteMessage, followUp, getMessage, reply, updateMessage } from '../contextes/functions';
+import { HttpOnlyBot } from '@src/structs/client';
 
 export class BaseContext<T extends APIInteraction> {
   params: {

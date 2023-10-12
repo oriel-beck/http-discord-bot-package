@@ -13,6 +13,9 @@
       "types": "./lib/index.d.ts"
     }
   },
+  "files": [
+    "lib/**/*"
+  ],
   "scripts": {
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint . --fix",
@@ -32,9 +35,6 @@
   "keywords": [
     "discord",
     "http-bot"
-  ],
-  "files": [
-    "lib/**/*"
   ],
   "author": "oriel-beck",
   "license": "MIT",
