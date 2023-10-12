@@ -30,7 +30,9 @@ export async function loadCommands(
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ApplicationCommandController>(`file://${join(path, dirent.name)}`);
-      const route = genRoute("commands", controllerInstance.type.toString(), dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''));
+      const commandData = controllerInstance.register();
+      if (!commandData) continue;
+      const route = genRoute("commands", commandData.toJSON().type?.toString() || "1", dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''));
       store.set(route, controllerInstance);
       loadRoute(publicKey, router, route, controllerInstance);
     }
