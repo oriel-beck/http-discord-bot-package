@@ -6,7 +6,12 @@ import { APIApplicationCommandInteractionDataOption, APIInteraction, Interaction
 import { REST, type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
 
-import { ApplicationCommandController, AutocompleteInteractionController, ComponentInteractionController, ModalSubmitInteractionController } from '../controllers';
+import {
+  ApplicationCommandController,
+  AutocompleteInteractionController,
+  ComponentInteractionController,
+  ModalSubmitInteractionController,
+} from '../controllers';
 import { ApplicationCommandContext, AutocompleteContext, ComponentContext, ModalSubmitContext } from '../structs/contextes';
 import { getRootPath, validateOptions, verifyRequest } from '@lib/util/util';
 import { loadAutocomplete, loadCommands, loadComponents, loadModals } from '@lib/util/load';
