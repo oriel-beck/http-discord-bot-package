@@ -1,17 +1,19 @@
 import type findMyWay from 'find-my-way';
-import type { AnyController } from '../controllers/types.js';
 
 import { access, readdir } from 'fs/promises';
 import { join } from 'path';
+import { Errors } from '@lib/errors/constants';
 import SuperMap from '@thunder04/supermap';
-import { ComponentInteractionController } from '../controllers/component-interaction.controller.js';
-import { AutocompleteInteractionController } from '../controllers/autocomplete-interaction.controller.js';
-import { joinRoute, verifyRequest } from './util.js';
-import { ApplicationCommandController } from '../controllers/application-command.controller.js';
-import { Errors } from '../structs/errors/constants.js';
-import { ModalSubmitInteractionController } from '../controllers/modal-submit-interaction.controller.js';
-import { BaseContext } from '../structs/contextes/base.context.js';
-import { APIInteraction } from 'discord-api-types/v10';
+import { joinRoute, verifyRequest } from './util';
+import type { APIInteraction } from 'discord-api-types/v10';
+import type {
+  AnyController,
+  ApplicationCommandController,
+  AutocompleteInteractionController,
+  ComponentInteractionController,
+  ModalSubmitInteractionController,
+} from '@src/controllers';
+import type { BaseContext } from '@lib/base/base.context';
 
 export async function loadCommands(
   publicKey: string,
@@ -32,7 +34,7 @@ export async function loadCommands(
       const controllerInstance = await getController<ApplicationCommandController>(`file://${join(path, dirent.name)}`);
       const commandData = controllerInstance.register();
       if (!commandData) continue;
-      const route = genRoute("commands", commandData.toJSON().type?.toString() || "1", dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''));
+      const route = genRoute('commands', commandData.toJSON().type?.toString() || '1', dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''));
       store.set(route, controllerInstance);
       loadRoute(publicKey, router, route, controllerInstance);
     }

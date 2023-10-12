@@ -1,8 +1,8 @@
+import { HttpBotClientOptions } from '@src/structs/client';
 import { verifyKey } from 'discord-interactions';
 import { readFileSync } from 'fs';
 import { IncomingMessage } from 'http';
 import { dirname, join } from 'path';
-import { HttpBotClientOptions } from '..';
 
 let rootPath: string | null = null;
 export function getRootPath(): string {

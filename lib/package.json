@@ -1,0 +1,54 @@
+{
+  "name": "discord-http-bot",
+  "version": "0.0.1",
+  "description": "A wip discord http bot framework",
+  "main": "lib/index.js",
+  "scripts": {
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "prepare": "npm run build && husky install",
+    "preversion": "npm run lint",
+    "prepack": "npm build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oriel-beck/http-discord-bot-package.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oriel-beck/http-discord-bot-package/issues"
+  },
+  "keywords": [
+    "discord",
+    "http-bot"
+  ],
+  "files": [
+    "lib/**/*"
+  ],
+  "author": "oriel-beck",
+  "license": "MIT",
+  "dependencies": {
+    "@discordjs/rest": "^2.0.1",
+    "@thunder04/supermap": "^3.0.3",
+    "discord-api-types": "^0.37.60",
+    "discord-interactions": "^3.4.0",
+    "find-my-way": "^7.6.2",
+    "pino": "^8.15.6"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.7.2",
+    "@commitlint/config-conventional": "^17.7.0",
+    "@swc/cli": "^0.1.62",
+    "@swc/core": "^1.3.92",
+    "@types/node": "^20.8.2",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "eslint": "^8.51.0",
+    "husky": "^8.0.3",
+    "prettier": "^3.0.3",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^5.2.2"
+  }
+}

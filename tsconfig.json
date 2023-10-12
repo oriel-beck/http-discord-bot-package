@@ -23,7 +23,11 @@
     "outDir": "lib",
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@lib/*": ["./src/lib/*"],
+      "@src/*": ["./src/*"]
+    }
   },
   "include": [
     "src"

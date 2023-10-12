@@ -1,7 +1,7 @@
 import type { APIModalSubmitInteraction } from 'discord-api-types/v10';
 import type { ModalSubmitInteractionControllerSettings } from './types';
-import type { BaseContext } from '../structs/contextes/base.context';
-import { BaseController } from './base.controller';
+import type { BaseContext } from '../lib/base/base.context';
+import { BaseController } from '../lib/base/base.controller';
 
 export abstract class ModalSubmitInteractionController extends BaseController<APIModalSubmitInteraction> {
   customId!: string;

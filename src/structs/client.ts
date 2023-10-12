@@ -6,14 +6,14 @@ import { APIApplicationCommandInteractionDataOption, APIInteraction, Interaction
 import { REST, type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
 
-import { loadAutocomplete, loadCommands, loadComponents, loadModals } from '../util/load';
+import { loadAutocomplete, loadCommands, loadComponents, loadModals } from '../lib/constants/load';
 import { ApplicationCommandController } from '../controllers/application-command.controller';
 import { ComponentInteractionController } from '../controllers/component-interaction.controller';
 import { ModalSubmitInteractionController } from '../controllers/modal-submit-interaction.controller';
 import { AutocompleteInteractionController } from '../controllers/autocomplete-interaction.controller';
-import { Errors } from './errors/constants';
-import { getRootPath, validateOptions, verifyRequest } from '../util/util';
-import { BaseContext } from './contextes/base.context';
+import { Errors } from '../lib/errors/constants';
+import { getRootPath, validateOptions, verifyRequest } from '../lib/constants/util';
+import { BaseContext } from '../lib/base/base.context';
 
 export class HttpOnlyBot {
   #publicKey: string;
@@ -125,7 +125,7 @@ export class HttpOnlyBot {
         /* eslint-enable */
       });
 
-      req.on("close", () => {
+      req.on('close', () => {
         this.logger.debug(`Finished handling request ${originalUrl}${originalUrl === req.url ? '' : ` (${req.url})`}`);
       });
     });
@@ -151,7 +151,9 @@ export class HttpOnlyBot {
         break;
       case InteractionType.ApplicationCommandAutocomplete:
         // TODO: add /{focused_option_name}
-        req.url = `/autocomplete/${data.data.name}/${data.data.options.find((opt: APIApplicationCommandInteractionDataOption & { focused?: boolean }) => opt?.focused === true)?.name}`;
+        req.url = `/autocomplete/${data.data.name}/${data.data.options.find(
+          (opt: APIApplicationCommandInteractionDataOption & { focused?: boolean }) => opt?.focused === true,
+        )?.name}`;
         break;
       case InteractionType.ModalSubmit:
         req.url = `/modals/${data.data.custom_id}`;
