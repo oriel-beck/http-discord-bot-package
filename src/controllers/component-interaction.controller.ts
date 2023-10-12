@@ -10,5 +10,5 @@ export abstract class ComponentInteractionController extends BaseController<APIM
     this.componentType = settings?.componentType || this?.componentType;
   }
 
-  abstract handler(context: ComponentContext): never;
+  abstract handler(context: ComponentContext): unknown;
 }

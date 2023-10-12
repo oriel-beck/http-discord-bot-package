@@ -9,5 +9,5 @@ export abstract class ModalSubmitInteractionController extends BaseController<AP
     super();
     this.customId = settings?.customId || this?.customId;
   }
-  abstract handler(context: ModalSubmitContext): never;
+  abstract handler(context: ModalSubmitContext): unknown;
 }

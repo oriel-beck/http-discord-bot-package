@@ -4,6 +4,6 @@ import { ApplicationCommandContext } from '../structs/contextes';
 import { BaseController } from '@lib/base/base.controller';
 
 export abstract class ApplicationCommandController extends BaseController<APIApplicationCommandInteraction> {
-  abstract handler(context: ApplicationCommandContext): never;
+  abstract handler(context: ApplicationCommandContext): unknown;
   abstract register(): SlashCommandBuilder | ContextMenuCommandBuilder | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
 }
