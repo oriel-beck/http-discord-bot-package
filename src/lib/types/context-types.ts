@@ -1,5 +1,5 @@
 import type { RawFile } from '@discordjs/rest';
-import type { HttpOnlyBot } from '../../structs/client';
+import type { HttpOnlyBot } from '@src/structs/client';
 import type { APIInteraction } from 'discord-api-types/v10';
 
 export type MessagePayload<T> = T & { attachments?: RawFile[] };
