@@ -46,7 +46,7 @@ You can override the path via the `customId` property.
 The path supports [find-my-way]() path structure, you can read about it in their [documentation]().
 
 Example:
-Path: /components/applications/:user/deny.ts
+Path: /components/applications/[user]/deny.ts
 ```ts
 import { ComponentType } from "discord-api-types/v10";
 import { ComponentContext, ComponentInteractionController } from "discord-http-bot";
@@ -71,7 +71,7 @@ To make a modal, make a folder called `modals`.
 Modal structure is the same as [components](#components) so make sure you read that.
 
 Example:
-Path: /modals/answers/:questionnum/index.ts
+Path: /modals/answers/[questionnum]/index.ts
 ```ts
 import { ModalSubmitContext, ModalSubmitInteractionController } from "discord-http-bot";
 
