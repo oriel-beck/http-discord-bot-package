@@ -12,5 +12,5 @@ export abstract class AutocompleteInteractionController extends BaseController<A
     this.commandName = settings?.commandName || this?.commandName;
   }
 
-  abstract handler(context: AutocompleteContext): never;
+  abstract handler(context: AutocompleteContext): unknown;
 }
