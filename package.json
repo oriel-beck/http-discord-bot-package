@@ -14,7 +14,7 @@
     }
   },
   "files": [
-    "lib/**/*"
+    "dist/**/*"
   ],
   "scripts": {
     "format": "prettier --write \"src/**/*.ts\"",
