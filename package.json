@@ -2,15 +2,15 @@
   "name": "discord-http-bot",
   "version": "0.0.1",
   "description": "A wip discord http bot framework",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "exports": {
     "import": {
-      "default": "./lib/index.js",
-      "types": "./lib/index.d.ts"
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
     "require": {
-      "default": "./lib/index.js",
-      "types": "./lib/index.d.ts"
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "files": [

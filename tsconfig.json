@@ -20,7 +20,7 @@
     "strict": true,
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "outDir": "lib",
+    "outDir": "dist",
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
