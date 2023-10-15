@@ -4,10 +4,11 @@ import { BaseController } from '@lib/base';
 import { ModalSubmitContext } from '@src/structs/contextes';
 
 export abstract class ModalSubmitInteractionController extends BaseController<APIModalSubmitInteraction> {
-  customId!: string;
+  customId?: string;
   constructor(settings?: ModalSubmitInteractionControllerSettings) {
     super();
-    this.customId = settings?.customId || this?.customId;
+    this.customId = settings?.customId;
   }
+  
   abstract handler(context: ModalSubmitContext): unknown;
 }

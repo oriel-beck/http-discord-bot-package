@@ -1,11 +1,5 @@
 import type findMyWay from 'find-my-way';
-
-import { access, readdir } from 'fs/promises';
-import { join } from 'path';
-import { Errors } from '@lib/errors/constants';
-import SuperMap from '@thunder04/supermap';
-import { joinRoute, verifyRequest } from './util';
-import type { APIInteraction } from 'discord-api-types/v10';
+import { InteractionType, type APIInteraction, ApplicationCommandType } from 'discord-api-types/v10';
 import type {
   AnyController,
   ApplicationCommandController,
@@ -14,6 +8,12 @@ import type {
   ModalSubmitInteractionController,
 } from '@src/controllers';
 import type { BaseContext } from '@lib/base/base.context';
+import { access, readdir } from 'fs/promises';
+import { join } from 'path';
+import { Errors } from '@lib/errors/constants';
+import SuperMap from '@thunder04/supermap';
+import { joinRoute, verifyRequest } from './util';
+import { ApplicationCommandContext } from '@src/index';
 
 export async function loadCommands(
   publicKey: string,
@@ -22,9 +22,7 @@ export async function loadCommands(
   prefix: string,
   store: SuperMap<string, ApplicationCommandController>,
 ) {
-  const canAccess = await access(path)
-    .then(() => true)
-    .catch(() => false);
+  const canAccess = await canAccessPath(path);
   if (!canAccess) return;
   for (const dirent of await readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
@@ -48,9 +46,7 @@ export async function loadComponents(
   prefix: string,
   store: SuperMap<string, ComponentInteractionController>,
 ) {
-  const canAccess = await access(path)
-    .then(() => true)
-    .catch(() => false);
+  const canAccess = await canAccessPath(path);
   if (!canAccess) return;
   for (const dirent of await readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
@@ -60,8 +56,7 @@ export async function loadComponents(
       const controllerInstance = await getController<ComponentInteractionController>(`file://${join(path, dirent.name)}`);
       const split = prefix.split('/');
       split.splice(1, 0, controllerInstance.componentType.toString());
-      // TODO: settings.customId should bypass the route generation
-      const route = genRoute(split.join('/'), dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''));
+      const route = controllerInstance.customId || genRoute(split.join('/'), dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''));
       store.set(route, controllerInstance);
       loadRoute(publicKey, router, route, controllerInstance);
     }
@@ -75,9 +70,7 @@ export async function loadModals(
   prefix: string,
   store: SuperMap<string, ModalSubmitInteractionController>,
 ) {
-  const canAccess = await access(path)
-    .then(() => true)
-    .catch(() => false);
+  const canAccess = await canAccessPath(path);
   if (!canAccess) return;
   for (const dirent of await readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
@@ -85,8 +78,7 @@ export async function loadModals(
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<ModalSubmitInteractionController>(`file://${join(path, dirent.name)}`);
-      // TODO: settings.customId should bypass the route generation
-      const route = genRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''));
+      const route = controllerInstance.customId || genRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''));
       store.set(route, controllerInstance);
       loadRoute(publicKey, router, route, controllerInstance);
     }
@@ -100,9 +92,7 @@ export async function loadAutocomplete(
   prefix: string,
   store: SuperMap<string, AutocompleteInteractionController>,
 ) {
-  const canAccess = await access(path)
-    .then(() => true)
-    .catch(() => false);
+  const canAccess = await canAccessPath(path);
   if (!canAccess) return;
   for (const dirent of await readdir(path, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
@@ -110,7 +100,7 @@ export async function loadAutocomplete(
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<AutocompleteInteractionController>(`file://${join(path, dirent.name)}`);
-      const route = genRoute(prefix, dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''), controllerInstance.option);
+      const route = genRoute(prefix, controllerInstance.commandName || dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''), controllerInstance.option);
       store.set(route, controllerInstance);
       loadRoute(publicKey, router, route, controllerInstance);
     }
@@ -122,6 +112,15 @@ function loadRoute(publicKey: string, router: findMyWay.Instance<findMyWay.HTTPV
     const verified = verifyRequest(publicKey, req, this.buffer);
     if (!verified) return Errors.Unauthorized(res);
     this.ctx.params = params || {};
+    if (this.ctx instanceof ApplicationCommandContext && this.ctx.data.data.type === ApplicationCommandType.ChatInput) {
+      const subcommand = this.ctx.data.data.options?.find((option) => option.type === 1);
+      // A lot of TS wizardry
+      if (subcommand) {
+        const applicationCommandController = controller as ApplicationCommandController;
+        const subcommandFunction = applicationCommandController[applicationCommandController.subcommands[subcommand.name] as keyof ApplicationCommandController] as (ctx: ApplicationCommandContext) => unknown;
+        return subcommandFunction(this.ctx);
+      } 
+    }
     controller.handler(this.ctx as never);
   });
 }
@@ -136,3 +135,7 @@ function genRoute(...parts: string[]) {
   route = route[route.length - 1] === '/' ? route.substring(0, route.length - 1) : route;
   return `/${route.replace(/\[([^)]+)\]/g, ':$1')}`;
 }
+
+const canAccessPath = (path: string) => access(path)
+  .then(() => true)
+  .catch(() => false); 

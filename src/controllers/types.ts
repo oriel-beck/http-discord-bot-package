@@ -1,4 +1,4 @@
-import type { ApplicationCommandType, ComponentType } from 'discord-api-types/v10';
+import type { ComponentType } from 'discord-api-types/v10';
 import type { ApplicationCommandController } from './application-command.controller';
 import type { ComponentInteractionController } from './component-interaction.controller';
 import type { AutocompleteInteractionController } from './autocomplete-interaction.controller';
@@ -23,7 +23,7 @@ export interface AutocompleteInteractionControllerSettings {
   /**
    * The command name this autocompletes for.
    */
-  commandName: string;
+  commandName?: string;
 }
 
 export interface ModalSubmitInteractionControllerSettings {
@@ -34,8 +34,10 @@ export interface ModalSubmitInteractionControllerSettings {
 }
 
 export interface ApplicationCommandControllerSettings {
-  type: ApplicationCommandType;
+  subcommands: Subcommands;
 }
+
+export type Subcommands = Record<string, string>;
 
 export type AnyController =
   | ApplicationCommandController

@@ -5,11 +5,11 @@ import { BaseController } from '@lib/base/base.controller';
 
 export abstract class AutocompleteInteractionController extends BaseController<APIApplicationCommandAutocompleteInteraction> {
   option!: AutocompleteInteractionControllerSettings['option'];
-  commandName!: string;
+  commandName?: string;
   constructor(settings: AutocompleteInteractionControllerSettings) {
     super();
-    this.option = settings?.option || this?.option;
-    this.commandName = settings?.commandName || this?.commandName;
+    this.option = settings?.option;
+    this.commandName = settings?.commandName;
   }
 
   abstract handler(context: AutocompleteContext): unknown;

@@ -55,13 +55,13 @@ export default class extends ComponentInteractionController {
     constructor() {
         super({
             componentType: ComponentType.Button
-        })
+        });
     }
 
     handler(context: ComponentContext) {
         context.reply({
             content: `Denied the application of <@${context.params['user']}>.`
-        })
+        });
     }
 }
 ```
@@ -91,7 +91,12 @@ Autocomplete builds the path from the file name and the option provided, so make
 import { AutocompleteContext, AutocompleteInteractionController } from "discord-http-bot";
 
 export default class extends AutocompleteInteractionController {
-    option: string = "autocomplete";
+    constructor() {
+        super({
+            option: "autocomplete"
+        });
+    }
+    
     handler(context: AutocompleteContext) {
         context.autocomplete([
             {
