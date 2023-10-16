@@ -1,5 +1,5 @@
 import type findMyWay from 'find-my-way';
-import { InteractionType, type APIInteraction, ApplicationCommandType } from 'discord-api-types/v10';
+import { type APIInteraction, ApplicationCommandType, ApplicationCommandOptionType } from 'discord-api-types/v10';
 import type {
   AnyController,
   ApplicationCommandController,
@@ -100,7 +100,11 @@ export async function loadAutocomplete(
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const controllerInstance = await getController<AutocompleteInteractionController>(`file://${join(path, dirent.name)}`);
-      const route = genRoute(prefix, controllerInstance.commandName || dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''), controllerInstance.option);
+      const route = genRoute(
+        prefix,
+        controllerInstance.commandName || dirent.name === 'index.js' ? '' : dirent.name.replace('.js', ''),
+        controllerInstance.option,
+      );
       store.set(route, controllerInstance);
       loadRoute(publicKey, router, route, controllerInstance);
     }
@@ -113,13 +117,15 @@ function loadRoute(publicKey: string, router: findMyWay.Instance<findMyWay.HTTPV
     if (!verified) return Errors.Unauthorized(res);
     this.ctx.params = params || {};
     if (this.ctx instanceof ApplicationCommandContext && this.ctx.data.data.type === ApplicationCommandType.ChatInput) {
-      const subcommand = this.ctx.data.data.options?.find((option) => option.type === 1);
+      const subcommand = this.ctx.data.data.options?.find((option) => option.type === ApplicationCommandOptionType.Subcommand);
       // A lot of TS wizardry
       if (subcommand) {
         const applicationCommandController = controller as ApplicationCommandController;
-        const subcommandFunction = applicationCommandController[applicationCommandController.subcommands[subcommand.name] as keyof ApplicationCommandController] as (ctx: ApplicationCommandContext) => unknown;
+        const subcommandFunction = applicationCommandController[
+          applicationCommandController.subcommands[subcommand.name] as keyof ApplicationCommandController
+        ] as (ctx: ApplicationCommandContext) => unknown;
         return subcommandFunction(this.ctx);
-      } 
+      }
     }
     controller.handler(this.ctx as never);
   });
@@ -136,6 +142,7 @@ function genRoute(...parts: string[]) {
   return `/${route.replace(/\[([^)]+)\]/g, ':$1')}`;
 }
 
-const canAccessPath = (path: string) => access(path)
-  .then(() => true)
-  .catch(() => false); 
+const canAccessPath = (path: string) =>
+  access(path)
+    .then(() => true)
+    .catch(() => false);

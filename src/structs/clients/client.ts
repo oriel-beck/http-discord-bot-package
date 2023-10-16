@@ -2,22 +2,22 @@ import { join } from 'path';
 import http, { type IncomingMessage, type ServerResponse } from 'http';
 import pino, { type Logger, type LoggerOptions } from 'pino';
 import findMyWay from 'find-my-way';
-import { APIApplicationCommandInteractionDataOption, APIInteraction, InteractionResponseType, InteractionType, Routes } from 'discord-api-types/v10';
+import { type APIApplicationCommandInteractionDataOption, type APIInteraction, InteractionResponseType, InteractionType, Routes } from 'discord-api-types/v10';
 import { REST, type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
 
-import {
+import type {
   ApplicationCommandController,
   AutocompleteInteractionController,
   ComponentInteractionController,
   ModalSubmitInteractionController,
-} from '../controllers';
-import { ApplicationCommandContext, AutocompleteContext, ComponentContext, ModalSubmitContext } from '../structs/contextes';
+} from '../../controllers';
+import { ApplicationCommandContext, AutocompleteContext, ComponentContext, ModalSubmitContext } from '../contextes';
 import { getRootPath, validateOptions, verifyRequest } from '@lib/util/util';
 import { loadAutocomplete, loadCommands, loadComponents, loadModals } from '@lib/util/load';
 import { Errors } from '@lib/errors/constants';
 
-export class HttpOnlyBot {
+export class Client {
   #publicKey: string;
 
   stores = {
@@ -32,14 +32,14 @@ export class HttpOnlyBot {
   router: findMyWay.Instance<findMyWay.HTTPVersion.V1>;
   port: number;
   host: string | undefined;
-  applicationId: string;
+  applicationId?: string;
 
-  constructor(opts: HttpBotClientOptions) {
+  constructor(opts: ClientOptions) {
     validateOptions(opts);
 
     this.logger = pino({
       level: 'debug',
-      name: 'http-only-bot',
+      name: 'discord-http-bot',
       ...opts?.loggerOptions,
     });
     this.router = findMyWay({
@@ -49,12 +49,14 @@ export class HttpOnlyBot {
     this.rest = new REST(opts?.djsRestOptions);
     this.port = opts?.port || 5000;
     this.host = opts?.host;
-    this.applicationId = Buffer.from(opts.botToken.split('.').at(0)!, 'base64').toString('ascii');
     this.#publicKey = opts.publicKey;
-    this.rest.setToken(opts.botToken);
   }
 
-  async login(callback?: () => unknown) {
+  async login(token: string) {
+    if (!token || typeof token !== 'string') throw new Error('Please provide a valid bot token');
+    this.applicationId = Buffer.from(token.split('.').at(0)!, 'base64').toString('ascii');
+    this.rest.setToken(token);
+
     this.logger.debug(`Logging in as ${this.applicationId}`);
     const maindir = getRootPath();
 
@@ -81,9 +83,9 @@ export class HttpOnlyBot {
     this.logger.info('Initiating server');
     this.initInitialListener();
 
-    return new Promise<void>((res, rej) => {
-      this.server.listen(this.port, this.host, callback);
-      this.server.once('listening', () => res());
+    return new Promise<string>((res, rej) => {
+      this.server.listen(this.port, this.host);
+      this.server.once('listening', () => res(this.applicationId!));
       this.server.once('error', (err) => rej(err));
     });
   }
@@ -140,7 +142,6 @@ export class HttpOnlyBot {
     if (!verified) {
       return Errors.Unauthorized(res);
     }
-    // TODO: break to smaller contexes later? (with `this is ...Context`)
     let ctx;
     switch (data.type) {
       case InteractionType.Ping:
@@ -171,11 +172,10 @@ export class HttpOnlyBot {
   }
 }
 
-export interface HttpBotClientOptions {
+export interface ClientOptions {
   port?: number;
   host?: string;
   publicKey: string;
-  botToken: string;
   loggerOptions?: LoggerOptions;
   routerOptions?: findMyWay.Config<findMyWay.HTTPVersion.V1>;
   djsRestOptions?: Partial<RESTOptions>;

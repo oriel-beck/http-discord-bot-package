@@ -1,4 +1,4 @@
-import { HttpBotClientOptions } from '@src/structs/client';
+import { ClientOptions } from '@src/structs/clients';
 import { verifyKey } from 'discord-interactions';
 import { readFileSync } from 'fs';
 import { IncomingMessage } from 'http';
@@ -44,8 +44,7 @@ export function verifyRequest(publicKey: string, req: IncomingMessage, buffer: B
   return true;
 }
 
-export function validateOptions(opts: HttpBotClientOptions) {
-  if (opts.botToken && opts.botToken.split('.').length != 3) throw new Error(`"${opts.botToken}" is not a valid bot token.`);
+export function validateOptions(opts: ClientOptions) {
   if (opts.defaultRoute && typeof opts.defaultRoute !== 'function') throw throwIncorrectConfigError('defaultRoute', 'function', typeof opts.defaultRoute);
   if (opts.djsRestOptions && typeof opts.djsRestOptions !== 'object') throw throwIncorrectConfigError('djsRestOptions', 'object', typeof opts.djsRestOptions);
   if (opts.host && typeof opts.host !== 'string') throw throwIncorrectConfigError('host', 'string', typeof opts.host);

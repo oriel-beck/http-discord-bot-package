@@ -1,3 +1,3 @@
 export * from './controllers';
-export * from './structs/client';
+export * from './structs/clients';
 export * from './structs/contextes';

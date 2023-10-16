@@ -11,6 +11,12 @@ export abstract class ApplicationCommandController extends BaseController<APIApp
     this.subcommands = settings?.subcommands;
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handler(context: ApplicationCommandContext): unknown { return }
-  abstract register(): SlashCommandBuilder | ContextMenuCommandBuilder | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'> | SlashCommandSubcommandsOnlyBuilder;
+  handler(context: ApplicationCommandContext): unknown {
+    return;
+  }
+  abstract register():
+    | SlashCommandBuilder
+    | ContextMenuCommandBuilder
+    | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>
+    | SlashCommandSubcommandsOnlyBuilder;
 }
