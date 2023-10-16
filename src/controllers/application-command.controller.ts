@@ -11,7 +11,7 @@ export abstract class ApplicationCommandController extends BaseController<APIApp
     this.subcommands = settings?.subcommands;
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handler(context: ApplicationCommandContext): unknown {
+  handler(context: ApplicationCommandContext<APIApplicationCommandInteraction>): unknown {
     return;
   }
   abstract register():

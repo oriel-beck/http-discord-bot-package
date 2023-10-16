@@ -1,5 +1,10 @@
 import type findMyWay from 'find-my-way';
-import { type APIInteraction, ApplicationCommandType, ApplicationCommandOptionType } from 'discord-api-types/v10';
+import {
+  type APIInteraction,
+  ApplicationCommandType,
+  ApplicationCommandOptionType,
+  APIChatInputApplicationCommandInteractionData,
+} from 'discord-api-types/v10';
 import type {
   AnyController,
   ApplicationCommandController,
@@ -116,14 +121,18 @@ function loadRoute(publicKey: string, router: findMyWay.Instance<findMyWay.HTTPV
     const verified = verifyRequest(publicKey, req, this.buffer);
     if (!verified) return Errors.Unauthorized(res);
     this.ctx.params = params || {};
-    if (this.ctx instanceof ApplicationCommandContext && this.ctx.data.data.type === ApplicationCommandType.ChatInput) {
-      const subcommand = this.ctx.data.data.options?.find((option) => option.type === ApplicationCommandOptionType.Subcommand);
-      // A lot of TS wizardry
+
+    // A lot of TS wizardry
+    if (this.ctx instanceof ApplicationCommandContext && (this.ctx as ApplicationCommandContext).data.data.type === ApplicationCommandType.ChatInput) {
+      const subcommand = (this.ctx.data as APIChatInputApplicationCommandInteractionData).options?.find(
+        (option) => option.type === ApplicationCommandOptionType.Subcommand,
+      );
       if (subcommand) {
         const applicationCommandController = controller as ApplicationCommandController;
         const subcommandFunction = applicationCommandController[
           applicationCommandController.subcommands[subcommand.name] as keyof ApplicationCommandController
         ] as (ctx: ApplicationCommandContext) => unknown;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         return subcommandFunction(this.ctx);
       }
     }

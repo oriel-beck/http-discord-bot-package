@@ -30,7 +30,7 @@ export class ClusterClient {
       this.logger.debug(`Forking process number ${i}`);
       cluster.fork();
     }
-    return "master";
+    return 'master';
   }
 
   private async workerProcess(token: string) {
