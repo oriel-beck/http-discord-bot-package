@@ -62,7 +62,7 @@ export class BaseContext<T extends APIInteraction> {
    * @param messageId Optional, defaults to the original message
    * @returns {APIMessage}
    */
-  public async updateMessage(message: MessagePayload<APIInteractionResponseUpdateMessage>, messageId?: string) {
+  public async updateMessage(message: MessagePayload<APIInteractionResponseUpdateMessage['data']>, messageId?: string) {
     const files = message.attachments;
     delete message.attachments;
     return await this.client.rest.patch(Routes.webhookMessage(this.client.applicationId!, this.data.token, messageId || '@original'), {
