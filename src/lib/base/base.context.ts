@@ -42,7 +42,7 @@ export class BaseContext<T extends APIInteraction> {
     if (returnReply) return await this.getMessage();
   }
 
-  public async deferWithSource(ephemeral: boolean) {
+  public async defer(ephemeral: boolean) {
     return await this.interactionCallback(InteractionResponseType.DeferredChannelMessageWithSource, {
       flags: ephemeral ? MessageFlags.Ephemeral : undefined,
     });
