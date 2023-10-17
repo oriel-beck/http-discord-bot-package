@@ -18,7 +18,7 @@ export class BaseContext<T extends APIInteraction> {
   ) { }
 
   public async reply(message: APIInteractionResponseCallbackData & {
-    files: {
+    files?: {
       name: string;
       file: Buffer | import("stream").Readable | import("stream/web").ReadableStream;
     }[] | undefined
