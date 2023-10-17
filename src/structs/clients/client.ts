@@ -96,7 +96,7 @@ export class Client {
       })
       .filter((v) => !!v);
 
-    await this.rest.interaction.bulkOverwriteApplicationCommands(process.env.APPLICATION_ID!, commands);
+    await this.rest.interaction.bulkOverwriteApplicationCommands(this.applicationId!, commands);
   }
 
   private initInitialListener() {

@@ -17,10 +17,10 @@ export class ClusterClient {
    */
   cpuCount = os.cpus().length;
 
-  async login(token: string) {
+  async login(token: string, applicationPublicKey: string) {
     if (!token || typeof token !== 'string') throw new Error('Please provide a valid bot token');
     if (cluster.isPrimary) return this.primaryProcess();
-    else return await this.workerProcess(token);
+    else return await this.workerProcess(token, applicationPublicKey);
   }
 
   private primaryProcess() {
@@ -33,10 +33,10 @@ export class ClusterClient {
     return 'master';
   }
 
-  private async workerProcess(token: string) {
+  private async workerProcess(token: string, applicationPublicKey: string) {
     const client = new Client({
       port: this.opts.port,
-      publicKey: process.env.APPLICATION_PUBLIC_KEY!,
+      publicKey: applicationPublicKey,
     });
 
     return await client.login(token);
