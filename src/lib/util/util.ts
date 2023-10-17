@@ -46,7 +46,6 @@ export function verifyRequest(publicKey: string, req: IncomingMessage, buffer: B
 
 export function validateOptions(opts: ClientOptions) {
   if (opts.defaultRoute && typeof opts.defaultRoute !== 'function') throw throwIncorrectConfigError('defaultRoute', 'function', typeof opts.defaultRoute);
-  if (opts.djsRestOptions && typeof opts.djsRestOptions !== 'object') throw throwIncorrectConfigError('djsRestOptions', 'object', typeof opts.djsRestOptions);
   if (opts.host && typeof opts.host !== 'string') throw throwIncorrectConfigError('host', 'string', typeof opts.host);
   if (opts.port && typeof opts.port !== 'number') throw throwIncorrectConfigError('port', 'number', typeof opts.port);
   if (opts.publicKey && typeof opts.publicKey !== 'string') throw throwIncorrectConfigError('publicKey', 'string', typeof opts.publicKey);
