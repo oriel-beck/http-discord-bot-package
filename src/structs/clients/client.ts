@@ -2,8 +2,8 @@ import { join } from 'path';
 import http, { type IncomingMessage, type ServerResponse } from 'http';
 import pino, { type Logger, type LoggerOptions } from 'pino';
 import findMyWay from 'find-my-way';
-import { type APIApplicationCommandInteractionDataOption, type APIInteraction, InteractionResponseType, InteractionType, Routes } from 'discord-api-types/v10';
-import { REST, type RESTOptions } from '@discordjs/rest';
+import { type APIApplicationCommandInteractionDataOption, type APIInteraction, InteractionResponseType, InteractionType } from 'discord-api-types/v10';
+import { type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
 
 import type {
@@ -16,17 +16,17 @@ import { ApplicationCommandContext, AutocompleteContext, ComponentContext, Modal
 import { getRootPath, validateOptions, verifyRequest } from '@lib/util/util';
 import { loadAutocomplete, loadCommands, loadComponents, loadModals } from '@lib/util/load';
 import { Errors } from '@lib/errors/constants';
+import { SnowTransfer } from 'snowtransfer';
 
 export class Client {
   #publicKey: string;
-
+  rest: SnowTransfer = new SnowTransfer();
   stores = {
     commands: new SuperMap<string, ApplicationCommandController>(),
     components: new SuperMap<string, ComponentInteractionController>(),
     modals: new SuperMap<string, ModalSubmitInteractionController>(),
     autocomplete: new SuperMap<string, AutocompleteInteractionController>(),
   };
-  rest: REST;
   server = http.createServer();
   logger: Logger;
   router: findMyWay.Instance<findMyWay.HTTPVersion.V1>;
@@ -46,7 +46,6 @@ export class Client {
       defaultRoute: (req, res) => (opts?.defaultRoute ? opts.defaultRoute(req, res) : {}),
       ...opts?.routerOptions,
     });
-    this.rest = new REST(opts?.djsRestOptions);
     this.port = opts?.port || 5000;
     this.host = opts?.host;
     this.#publicKey = opts.publicKey;
@@ -55,7 +54,7 @@ export class Client {
   async login(token: string) {
     if (!token || typeof token !== 'string') throw new Error('Please provide a valid bot token');
     this.applicationId = Buffer.from(token.split('.').at(0)!, 'base64').toString('ascii');
-    this.rest.setToken(token);
+    this.rest.token = token;
 
     this.logger.debug(`Logging in as ${this.applicationId}`);
     const maindir = getRootPath();
@@ -94,13 +93,11 @@ export class Client {
     const commands = this.stores.commands
       .map((controller) => {
         const commandBody = controller.register();
-        if (!commandBody) return null;
         return commandBody.toJSON();
       })
       .filter((v) => !!v);
-    await this.rest.put(Routes.applicationCommands(process.env.APPLICATION_ID!), {
-      body: commands,
-    });
+
+    await this.rest.interaction.bulkOverwriteApplicationCommands(process.env.APPLICATION_ID!, commands);
   }
 
   private initInitialListener() {

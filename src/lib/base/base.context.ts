@@ -1,13 +1,12 @@
 import {
   APIInteraction,
-  APIInteractionResponseChannelMessageWithSource,
-  APIInteractionResponseUpdateMessage,
+  APIInteractionResponseCallbackData,
   InteractionResponseType,
   MessageFlags,
-  Routes,
+  RESTPatchAPIInteractionOriginalResponseJSONBody,
+  RESTPostAPIInteractionFollowupJSONBody,
 } from 'discord-api-types/v10';
 import { Client } from '@src/structs/clients';
-import { MessagePayload } from '@lib/types';
 
 export class BaseContext<T extends APIInteraction> {
   params: {
@@ -16,36 +15,29 @@ export class BaseContext<T extends APIInteraction> {
   constructor(
     public data: T,
     public client: Client,
-  ) {}
+  ) { }
 
-  public interactionCallback(type: InteractionResponseType, data?: unknown): unknown {
-    return this.client.rest.post(Routes.interactionCallback(this.data.id, this.data.token), {
-      body: {
-        type,
-        data,
-      },
-    });
-  }
-
-  public async reply(message: MessagePayload<APIInteractionResponseChannelMessageWithSource['data']>, returnReply = false) {
-    const files = message.attachments;
-    delete message.attachments;
-    await this.client.rest.post(Routes.interactionCallback(this.data.id, this.data.token), {
-      files,
-      body: {
-        type: InteractionResponseType.ChannelMessageWithSource,
-        data: {
-          ...message,
-        },
-      },
+  public async reply(message: APIInteractionResponseCallbackData & {
+    files: {
+      name: string;
+      file: Buffer | import("stream").Readable | import("stream/web").ReadableStream;
+    }[] | undefined
+  }, returnReply = false) {
+    await this.client.rest.interaction.createInteractionResponse(this.data.id, this.data.token, {
+      type: InteractionResponseType.ChannelMessageWithSource,
+      data: message,
+      files: message?.files
     });
     if (returnReply) return await this.getMessage();
   }
 
   public async defer(ephemeral: boolean) {
-    return await this.interactionCallback(InteractionResponseType.DeferredChannelMessageWithSource, {
-      flags: ephemeral ? MessageFlags.Ephemeral : undefined,
-    });
+    return this.client.rest.interaction.createInteractionResponse(this.data.id, this.data.token, {
+      type: InteractionResponseType.DeferredChannelMessageWithSource,
+      data: {
+        flags: ephemeral ? MessageFlags.Ephemeral : undefined
+      }
+    })
   }
 
   /**
@@ -54,7 +46,7 @@ export class BaseContext<T extends APIInteraction> {
    * @returns {APIMessage}
    */
   public async getMessage(messageId?: string) {
-    return await this.client.rest.get(Routes.webhookMessage(this.client.applicationId!, this.data.token, messageId || '@original'));
+    return messageId ? this.client.rest.interaction.getFollowupMessage(this.client.applicationId!, this.data.token, messageId) : this.client.rest.interaction.getOriginalInteractionResponse(this.client.applicationId!, this.data.token);
   }
 
   /**
@@ -62,17 +54,13 @@ export class BaseContext<T extends APIInteraction> {
    * @param messageId Optional, defaults to the original message
    * @returns {APIMessage}
    */
-  public async updateMessage(message: MessagePayload<APIInteractionResponseUpdateMessage['data']>, messageId?: string) {
-    const files = message.attachments;
-    delete message.attachments;
-    return await this.client.rest.patch(Routes.webhookMessage(this.client.applicationId!, this.data.token, messageId || '@original'), {
-      files,
-      body: {
-        data: {
-          ...message,
-        },
-      },
-    });
+  public async updateMessage(message: RESTPatchAPIInteractionOriginalResponseJSONBody & {
+    files?: Array<{
+      name: string;
+      file: Buffer | import("stream").Readable | import("stream/web").ReadableStream;
+    }>;
+  }, messageId?: string) {
+    return messageId ? this.client.rest.interaction.editFollowupMessage(this.client.applicationId!, this.data.token, messageId, message) : this.client.rest.interaction.editOriginalInteractionResponse(this.client.applicationId!, this.data.token, message)
   }
 
   /**
@@ -81,19 +69,15 @@ export class BaseContext<T extends APIInteraction> {
    * @returns {unknown}
    */
   public async deleteMessage(messageId?: string) {
-    return await this.client.rest.delete(Routes.webhookMessage(this.client.applicationId!, this.data.token, messageId || '@original'));
+    return messageId ? this.client.rest.interaction.deleteFollowupMessage(this.client.applicationId!, this.data.token, messageId) : this.client.rest.interaction.deleteOriginalInteractionResponse(this.client.applicationId!, this.data.token);
   }
 
-  public async followUp(message: MessagePayload<APIInteractionResponseChannelMessageWithSource>) {
-    const files = message.attachments;
-    delete message.attachments;
-    return await this.client.rest.post(Routes.webhook(this.client.applicationId!, this.data.token), {
-      body: {
-        files,
-        data: {
-          ...message,
-        },
-      },
-    });
+  public async followUp(message: RESTPostAPIInteractionFollowupJSONBody & {
+    files?: Array<{
+      name: string;
+      file: Buffer | import("stream").Readable | import("stream/web").ReadableStream;
+    }>;
+  }) {
+    return this.client.rest.interaction.createFollowupMessage(this.client.applicationId!, this.data.token, message)
   }
 }

@@ -39,12 +39,12 @@
   "author": "oriel-beck",
   "license": "MIT",
   "dependencies": {
-    "@discordjs/rest": "^2.0.1",
     "@thunder04/supermap": "^3.0.3",
     "discord-api-types": "^0.37.60",
     "discord-interactions": "^3.4.0",
     "find-my-way": "^7.7.0",
-    "pino": "^8.16.0"
+    "pino": "^8.16.0",
+    "snowtransfer": "^0.9.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.8.0",
