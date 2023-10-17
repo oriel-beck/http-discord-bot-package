@@ -3,7 +3,6 @@ import http, { type IncomingMessage, type ServerResponse } from 'http';
 import pino, { type Logger, type LoggerOptions } from 'pino';
 import findMyWay from 'find-my-way';
 import { type APIApplicationCommandInteractionDataOption, type APIInteraction, InteractionResponseType, InteractionType } from 'discord-api-types/v10';
-import { type RESTOptions } from '@discordjs/rest';
 import SuperMap from '@thunder04/supermap';
 
 import type {
@@ -175,6 +174,5 @@ export interface ClientOptions {
   publicKey: string;
   loggerOptions?: LoggerOptions;
   routerOptions?: findMyWay.Config<findMyWay.HTTPVersion.V1>;
-  djsRestOptions?: Partial<RESTOptions>;
   defaultRoute?(req: IncomingMessage, res: ServerResponse<IncomingMessage>): unknown;
 }
