@@ -19,7 +19,7 @@ import { SnowTransfer } from 'snowtransfer';
 
 export class Client {
   #publicKey: string;
-  rest: SnowTransfer = new SnowTransfer();
+  rest!: SnowTransfer;
   stores = {
     commands: new SuperMap<string, ApplicationCommandController>(),
     components: new SuperMap<string, ComponentInteractionController>(),
@@ -53,7 +53,7 @@ export class Client {
   async login(token: string) {
     if (!token || typeof token !== 'string') throw new Error('Please provide a valid bot token');
     this.applicationId = Buffer.from(token.split('.').at(0)!, 'base64').toString('ascii');
-    this.rest.token = token;
+    this.rest = new SnowTransfer(token);
 
     this.logger.debug(`Logging in as ${this.applicationId}`);
     const maindir = getRootPath();
