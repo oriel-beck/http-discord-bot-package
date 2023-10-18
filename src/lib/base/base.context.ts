@@ -4,7 +4,7 @@ import {
   InteractionResponseType,
   MessageFlags,
   RESTPatchAPIInteractionOriginalResponseJSONBody,
-  RESTPostAPIInteractionFollowupJSONBody,
+  RESTPostAPIInteractionFollowupJSONBody
 } from 'discord-api-types/v10';
 import { Client } from '@src/structs/clients';
 

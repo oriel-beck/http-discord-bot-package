@@ -4,7 +4,7 @@ import { type APIApplicationCommandInteraction, type ApplicationCommandOptionTyp
 
 export class ApplicationCommandContext<T extends APIApplicationCommandInteraction = APIApplicationCommandInteraction> extends BaseContext<T> {
   async createModal(modal: ModalBuilder) {
-    return await this.client.rest.interaction.createInteractionResponse(this.client.applicationId!, this.data.token, {
+    return await this.client.rest.interaction.createInteractionResponse(this.data.id, this.data.token, {
       type: InteractionResponseType.Modal,
       data: modal.toJSON()
     });

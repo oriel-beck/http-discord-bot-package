@@ -4,7 +4,7 @@ import { type APIApplicationCommandAutocompleteInteraction, type APIApplicationC
 export class AutocompleteContext extends BaseContext<APIApplicationCommandAutocompleteInteraction> {
   async autocomplete(choices: APIApplicationCommandOptionChoice[]) {
     if (choices.length > 25) throw new Error('[autocomplete]: Cannot send over 25 choices!');
-    return await this.client.rest.interaction.createInteractionResponse(this.client.applicationId!, this.data.token, {
+    return await this.client.rest.interaction.createInteractionResponse(this.data.id, this.data.token, {
       type: InteractionResponseType.ApplicationCommandAutocompleteResult,
       data: { choices }
     })
