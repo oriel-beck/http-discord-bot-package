@@ -6,7 +6,7 @@ export class AutocompleteContext extends BaseContext<APIApplicationCommandAutoco
     if (choices.length > 25) throw new Error('[autocomplete]: Cannot send over 25 choices!');
     return await this.client.rest.interaction.createInteractionResponse(this.data.id, this.data.token, {
       type: InteractionResponseType.ApplicationCommandAutocompleteResult,
-      data: { choices }
-    })
+      data: { choices },
+    });
   }
 }
